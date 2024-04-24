@@ -1,0 +1,11 @@
+python-dotenv
+pycryptodome
+argon2-cffi
+psycopg
+psycopg-binary
+grpcio
+grpcio-tools
+pytest
+pyserial
+pymodbus
+spidev
