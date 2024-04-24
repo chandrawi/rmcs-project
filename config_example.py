@@ -38,6 +38,10 @@ GATEWAY_MODBUS = {
     "serial_port": "/dev/ttyS0"
 }
 
+GATEWAY_LORA = {
+    "id": "00000000-0000-0000-0000-000000000000"
+}
+
 TIMING = {
     "transfer_sleep": 1,
     "analysis_sleep": 1,
