@@ -57,3 +57,8 @@ TIMING = {
     "analysis_sleep": 1,
     "max_drift": 0.5
 }
+
+EXTERNAL_API = {
+    "token": "CUNeYi2wBCFKtsC4CbVbiOnoeYY89yKC",
+    "url": "http://batubara.koneksi.cloud:8080/api/v1/report-start-finish"
+}
