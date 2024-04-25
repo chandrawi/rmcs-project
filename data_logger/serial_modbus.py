@@ -5,7 +5,18 @@ import serial
 import time
 import config
 
-ser = serial.Serial(config.GATEWAY_MODBUS['serial_port'], 9600, timeout=1)
+# Get gateway ID from input argument and corresponding configurations from config file
+invalid = True
+if len(sys.argv) > 1:
+    gateway_id = sys.argv[1]
+    if gateway_id in config.GATEWAY_MODBUS:
+        GATEWAY = config.GATEWAY_MODBUS[gateway_id]
+        if all(k in GATEWAY for k in ("serial_port", "period_time")):
+            invalid = False
+if invalid:
+    raise Exception("Gateway ID input missing, invalid format, or invalid gateway configuration")
+
+ser = serial.Serial(GATEWAY['serial_port'], 9600, timeout=1)
 
 # Soil inclinometer X, Y, and Z acceleration with 0x01 to 0x05 addresses
 print("Soil Inclinometer")

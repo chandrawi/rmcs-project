@@ -28,19 +28,29 @@ API = {
     "password": "Ap1_P4s5w0rd"
 }
 
-GATEWAYS = [
-    "00000000-0000-0000-0000-000000000000"
-]
-
 GATEWAY_MODBUS = {
-    "id": "00000000-0000-0000-0000-000000000000",
-    "period_time": 60,
-    "serial_port": "/dev/ttyS0"
+    "00000000-0000-0000-0000-000000000000": {
+        "period_time": 60,
+        "serial_port": "/dev/ttyS0"
+    }
 }
 
 GATEWAY_LORA = {
-    "id": "00000000-0000-0000-0000-000000000000"
+    "00000000-0000-0000-0000-000000000000": {
+        "spi": (3, 0),
+        "cs": (4, 6),
+        "reset": (4,1),
+        "busy": (4, 3),
+        "frequency": 915000000,
+        "sf": 8,
+        "bw": 125000,
+        "cr": 5
+    }
 }
+
+GATEWAYS = []
+for k in GATEWAY_MODBUS: GATEWAYS.append(k)
+for k in GATEWAY_LORA: GATEWAYS.append(k)
 
 TIMING = {
     "transfer_sleep": 1,

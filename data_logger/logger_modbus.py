@@ -18,8 +18,19 @@ class DeviceMap:
     model: UUID
     type: str
 
+# Get gateway ID from input argument and corresponding configurations from config file
+invalid = True
+if len(sys.argv) > 1:
+    gateway_id = sys.argv[1]
+    if gateway_id in config.GATEWAY_MODBUS:
+        GATEWAY = config.GATEWAY_MODBUS[gateway_id]
+        if all(k in GATEWAY for k in ("serial_port", "period_time")):
+            invalid = False
+if invalid:
+    raise Exception("Gateway ID input missing, invalid format, or invalid gateway configuration")
+
 # create client object
-client = ModbusSerialClient(config.GATEWAY_MODBUS['serial_port'], baudrate=9600)
+client = ModbusSerialClient(GATEWAY['serial_port'], baudrate=9600)
 # connect to device
 client.connect()
 
@@ -40,7 +51,7 @@ for token in login.access_tokens:
 
 # read devices associated with configured gateway
 device_map: list[DeviceMap] = []
-devices = resource.list_device_by_gateway(UUID(config.GATEWAY_MODBUS['id']))
+devices = resource.list_device_by_gateway(UUID(gateway_id))
 for device in devices:
     if device.id != device.gateway_id: # filter out gateway
         slave_id = None
@@ -56,7 +67,7 @@ for device in device_map:
 
 while True:
 
-    if int(time.time()) % config.GATEWAY_MODBUS["period_time"] != 0:
+    if int(time.time()) % GATEWAY["period_time"] != 0:
         continue
     now = datetime.now().replace(microsecond=0)
     now_str = now.strftime("%Y-%m-%d %H:%M:%S")
@@ -93,5 +104,5 @@ while True:
         finally:
             client.close()
 
-    while int(time.time()) % config.GATEWAY_MODBUS["period_time"] == 0:
+    while int(time.time()) % GATEWAY["period_time"] == 0:
         pass

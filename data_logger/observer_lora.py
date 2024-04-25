@@ -1,13 +1,28 @@
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 from LoRaRF import SX126x, LoRaSpi, LoRaGpio
 import time
 from datetime import datetime
+import config
+
+# Get gateway ID from input argument and corresponding configurations from config file
+invalid = True
+if len(sys.argv) > 1:
+    gateway_id = sys.argv[1]
+    if gateway_id in config.GATEWAY_LORA:
+        GATEWAY = config.GATEWAY_LORA[gateway_id]
+        if all(k in GATEWAY for k in ("spi", "cs", "reset", "busy")):
+            invalid = False
+if invalid:
+    raise Exception("Gateway ID input missing, invalid format, or invalid gateway configuration")
 
 # Begin LoRa radio with connected SPI bus and IO pins (cs and reset) on GPIO
 # SPI is defined by bus ID and cs ID and IO pins defined by chip and offset number
-spi = LoRaSpi(3, 0)
-cs = LoRaGpio(4, 6)
-reset = LoRaGpio(4, 1)
-busy = LoRaGpio(4, 3)
+spi = LoRaSpi(GATEWAY['spi'][0], GATEWAY['spi'][1])
+cs = LoRaGpio(GATEWAY['cs'][0], GATEWAY['cs'][1])
+reset = LoRaGpio(GATEWAY['reset'][0], GATEWAY['reset'][1])
+busy = LoRaGpio(GATEWAY['busy'][0], GATEWAY['busy'][1])
 LoRa = SX126x(spi, cs, reset, busy)
 print("Begin LoRa radio")
 if not LoRa.begin() :

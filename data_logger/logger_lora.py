@@ -49,11 +49,26 @@ CMD_CODE_RETRANSMIT_2                 =  0x0C
 CMD_CODE_RETRANSMIT_3                 =  0x0D
 CMD_CODE_RETRANSMIT_4                 =  0x0E
 
+# Get gateway ID from input argument and corresponding configurations from config file
+invalid = True
+if len(sys.argv) > 1:
+    gateway_id = sys.argv[1]
+    if gateway_id in config.GATEWAY_LORA:
+        GATEWAY = config.GATEWAY_LORA[gateway_id]
+        if all(k in GATEWAY for k in ("spi", "cs", "reset", "busy")):
+            if "frequency" not in GATEWAY: GATEWAY['frequency'] = 915000000
+            if "sf" not in GATEWAY: GATEWAY['sf'] = 7
+            if "bw" not in GATEWAY: GATEWAY['bw'] = 125000
+            if "cr" not in GATEWAY: GATEWAY['cr'] = 5
+            invalid = False
+if invalid:
+    raise Exception("Gateway ID input missing, invalid format, or invalid gateway configuration")
+
 # Begin LoRa radio with connected SPI bus and IO pins (cs and reset) on GPIO
-spi = LoRaSpi(3, 0)
-cs = LoRaGpio(4, 6)
-reset = LoRaGpio(4, 1)
-busy = LoRaGpio(4, 3)
+spi = LoRaSpi(GATEWAY['spi'][0], GATEWAY['spi'][1])
+cs = LoRaGpio(GATEWAY['cs'][0], GATEWAY['cs'][1])
+reset = LoRaGpio(GATEWAY['reset'][0], GATEWAY['reset'][1])
+busy = LoRaGpio(GATEWAY['busy'][0], GATEWAY['busy'][1])
 LoRa = SX126x(spi, cs, reset, busy)
 print("Begin LoRa radio")
 if not LoRa.begin() :
@@ -62,14 +77,14 @@ if not LoRa.begin() :
 # Setting LoRa modem configuration based on gateway setting in database
 print("Set RF module to use TCXO as clock reference")
 LoRa.setDio3TcxoCtrl(LoRa.DIO3_OUTPUT_1_8, LoRa.TCXO_DELAY_10)
-print("Set frequency to 915 Mhz")
-LoRa.setFrequency(915000000)
+print("Set frequency to {} Mhz".format(GATEWAY['frequency']/1000000.0))
+LoRa.setFrequency(GATEWAY['frequency'])
 print("Set TX power to +22 dBm")
 LoRa.setTxPower(22)
 print("Set RX gain to boosted gain")
 LoRa.setRxGain(LoRa.RX_GAIN_BOOSTED)
-print("Set modulation parameters:\n\tSpreading factor = 8\n\tBandwidth = 125 kHz\n\tCoding rate = 4/5")
-LoRa.setLoRaModulation(8, 125000, 5)
+print("Set modulation parameters:\n\tSpreading factor = {}\n\tBandwidth = {} kHz\n\tCoding rate = 4/{}".format(GATEWAY['sf'], GATEWAY['bw'], GATEWAY['cr']))
+LoRa.setLoRaModulation(GATEWAY['sf'], GATEWAY['bw'], GATEWAY['cr'])
 print("Set packet parameters:\n\tExplicit header type\n\tPreamble length = 12\n\tPayload Length = 15\n\tCRC on")
 LoRa.setLoRaPacket(LoRa.HEADER_EXPLICIT, 12, 15, True)
 print("Set syncronize word to 0x3444")
