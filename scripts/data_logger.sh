@@ -1,28 +1,38 @@
 #!/bin/bash
 
-sleep 15
+# load variables from configuration file
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+CONF_FILE="${SCRIPT_DIR}/config.sh"
+source $CONF_FILE
+
+sleep $INITIAL_SLEEP
 
 while :
 do
 
-	logger_modbus=$(pgrep -a python | grep -c /opt/rmcs-project/data_logger/logger_modbus.py)
-	if [ $logger_modbus -eq 0 ]
-	then
+	# run data logger scripts listed on configuration file
+	for i in "${!LOGGER_SCRIPTS[@]}"; do
+		if [[ ${LOGGER_SCRIPTS[$i]:0:1} = "/" ]]; then
 
-		printf "rerun data logger script...\n"
-		sudo /opt/rmcs-project/.venv/bin/python /opt/rmcs-project/data_logger/logger_modbus.py &
+			# append gateway ID as command argument
+			SCRIPT_PATH="${BASE_PATH}${LOGGER_SCRIPTS[$i]}"
+			SCRIPT_COMMAND=$SCRIPT_PATH
+			regex='[[:xdigit:]]{8}-[[:xdigit:]]{4}-[[:xdigit:]]{4}-[[:xdigit:]]{4}-[[:xdigit:]]{12}$'
+			if [[ ${LOGGER_SCRIPTS[$i+1]} =~ $regex ]]; then
+				SCRIPT_COMMAND+=" ${LOGGER_SCRIPTS[$i+1]}"
+			fi
 
-	fi
+			logger=$(pgrep -a python | grep -c $SCRIPT_PATH)
+			if [ $logger -eq 0 ]
+			then
 
-	logger_lora=$(pgrep -a python | grep -c /opt/rmcs-project/data_logger/logger_lora.py)
-	if [ $logger_lora -eq 0 ]
-	then
+				printf "rerun data logger script...\n"
+				sudo $PYTHON_PATH $SCRIPT_COMMAND &
 
-		printf "rerun data logger script...\n"
-		sudo /opt/rmcs-project/.venv/bin/python /opt/rmcs-project/data_logger/logger_lora.py &
+			fi
+		fi
+	done
 
-	fi
-
-	sleep 5
+	sleep $CHECK_DURATION_LOGGER
 
 done

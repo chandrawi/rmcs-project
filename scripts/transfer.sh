@@ -1,55 +1,32 @@
 #!/bin/bash
 
-sleep 15
+# load variables from configuration file
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+CONF_FILE="${SCRIPT_DIR}/config.sh"
+source $CONF_FILE
+
+sleep $INITIAL_SLEEP
 
 while :
 do
 
-	transfer_local=$(pgrep -a python | grep -c /home/gundala/rmcs-server/transfer/transfer_local.py)
-	if [ $transfer_local -eq 0 ]
-	then
+	# run transfer scripts listed on configuration file
+	for i in "${!TRANSFER_SCRIPTS[@]}"; do
+		if [[ ${TRANSFER_SCRIPTS[$i]:0:1} = "/" ]]; then
 
-		printf "rerun transfer local script...\n"
-		/home/gundala/rmcs-server/.venv/bin/python /home/gundala/rmcs-server/transfer/transfer_local.py &
+			SCRIPT_COMMAND="${BASE_PATH}${TRANSFER_SCRIPTS[$i]}"
 
-	fi
+			logger=$(pgrep -a python | grep -c $SCRIPT_COMMAND)
+			if [ $logger -eq 0 ]
+			then
 
-	transfer_first=$(pgrep -a python | grep -c /opt/rmcs-project/transfer/transfer_server_first.py)
-	if [ $transfer_first -eq 0 ]
-	then
+				printf "rerun transfer script...\n"
+				sudo $PYTHON_PATH $SCRIPT_COMMAND &
 
-		printf "rerun transfer server first script...\n"
-		/opt/rmcs-project/.venv/bin/python /opt/rmcs-project/transfer/transfer_server_first.py &
+			fi
+		fi
+	done
 
-	fi
-
-	transfer_last=$(pgrep -a python | grep -c /opt/rmcs-project/transfer/transfer_server_last.py)
-	if [ $transfer_last -eq 0 ]
-	then
-
-		printf "rerun transfer server last script...\n"
-		/opt/rmcs-project/.venv/bin/python /opt/rmcs-project/transfer/transfer_server_last.py &
-
-	fi
-
-	transfer_ext_db=$(pgrep -a python | grep -c /home/gundala/rmcs-server/transfer/clem/transfer_external_db.py)
-	if [ $transfer_ext_db -eq 0 ]
-	then
-
-		printf "rerun transfer external database script...\n"
-		/home/gundala/rmcs-server/.venv/bin/python /home/gundala/rmcs-server/transfer/clem/transfer_external_db.py &
-
-	fi
-
-	transfer_ext_api=$(pgrep -a python | grep -c /home/gundala/rmcs-server/transfer/clem/transfer_external_api.py)
-	if [ $transfer_ext_api -eq 0 ]
-	then
-
-		printf "rerun transfer external api script...\n"
-		/home/gundala/rmcs-server/.venv/bin/python /home/gundala/rmcs-server/transfer/clem/transfer_external_api.py &
-
-	fi
-
-	sleep 5
+	sleep $CHECK_DURATION_LOGGER
 
 done
