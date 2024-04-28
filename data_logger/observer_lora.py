@@ -8,14 +8,15 @@ import config
 
 # Get gateway ID from input argument and corresponding configurations from config file
 invalid = True
-if len(sys.argv) > 1:
-    gateway_id = sys.argv[1]
-    if gateway_id in config.GATEWAY_LORA:
-        GATEWAY = config.GATEWAY_LORA[gateway_id]
-        if all(k in GATEWAY for k in ("spi", "cs", "reset", "busy")):
-            invalid = False
+if len(config.GATEWAY_LORA) > 0:
+    gateway_id = next(iter(config.GATEWAY_LORA))
+    if len(sys.argv) > 1:
+        gateway_id = sys.argv[1] if sys.argv[1] in config.GATEWAY_LORA else gateway_id
+    GATEWAY = config.GATEWAY_LORA[gateway_id]
+    if all(k in GATEWAY for k in ("spi", "cs", "reset", "busy")):
+        invalid = False
 if invalid:
-    raise Exception("Gateway ID input missing, invalid format, or invalid gateway configuration")
+    raise Exception("Gateway ID input is missing, invalid format, or invalid gateway configuration")
 
 # Begin LoRa radio with connected SPI bus and IO pins (cs and reset) on GPIO
 # SPI is defined by bus ID and cs ID and IO pins defined by chip and offset number

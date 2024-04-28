@@ -18,16 +18,17 @@ class DeviceMap:
     model: UUID
     type: str
 
-# Get gateway ID from input argument and corresponding configurations from config file
+# Get default gateway ID or ID from input argument and then get corresponding configurations from config file
 invalid = True
-if len(sys.argv) > 1:
-    gateway_id = sys.argv[1]
-    if gateway_id in config.GATEWAY_MODBUS:
-        GATEWAY = config.GATEWAY_MODBUS[gateway_id]
-        if all(k in GATEWAY for k in ("serial_port", "period_time")):
-            invalid = False
+if len(config.GATEWAY_MODBUS) > 0:
+    gateway_id = next(iter(config.GATEWAY_MODBUS))
+    if len(sys.argv) > 1:
+        gateway_id = sys.argv[1] if sys.argv[1] in config.GATEWAY_MODBUS else gateway_id
+    GATEWAY = config.GATEWAY_MODBUS[gateway_id]
+    if all(k in GATEWAY for k in ("serial_port", "period_time")):
+        invalid = False
 if invalid:
-    raise Exception("Gateway ID input missing, invalid format, or invalid gateway configuration")
+    raise Exception("Gateway ID input is missing, invalid format, or invalid gateway configuration")
 
 # create client object
 client = ModbusSerialClient(GATEWAY['serial_port'], baudrate=9600)
