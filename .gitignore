@@ -1,5 +1,6 @@
 .venv
 config.py
+config.sh
 
 __pycache__/
 *.py[cod]
