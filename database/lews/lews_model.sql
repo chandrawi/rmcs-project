@@ -1,0 +1,95 @@
+INSERT INTO public.model (model_id,"name",category,description) VALUES
+	 ('2f85c046-6851-4b80-8e6e-3698e9e707db','3-axis 16-bit accelerometer','RAW','3 16-bit integer accelerometer output value'),
+	 ('9d93adb9-4a93-4e26-998c-26349d9932a8','XZ-axis soil inclinometer','DATA','XZ-axis inclination and displacement, Y-axis parallel with gravity'),
+	 ('eb93788f-aa61-421c-916d-f7d6026256de','piezometer raw data','RAW','16-bit integer pressure and depth value'),
+	 ('91b65b70-c421-42fa-8c54-16fc8bbed445','piezometer data','DATA','pressure and depth value'),
+	 ('ed66830d-ce39-4dc9-a8f2-6eac3fef461f','rain gauge raw data','RAW','16-bit integer rain fall value'),
+	 ('6a28ad85-0a32-41b8-acb5-ee92a523ec74','rain gauge data','DATA','rain gauge yesterday, daily, last hour, and hourly data'),
+	 ('939909f1-798d-4073-88eb-e80a3b846e40','environment sensor data','DATA','air temperature, relative humidity, and pressure data'),
+	 ('c16908e8-cc52-49bf-9619-03c1c79edfb3','environment sensor raw data','RAW','16-bit integer temperature, humidity, and pressure value');
+INSERT INTO public.model_config (model_id,"index","name",value,"type",category) VALUES
+	 ('9d93adb9-4a93-4e26-998c-26349d9932a8',0,'scale',decode('616363656C65726174696F6E2D58','hex'),3,'SCALE'),
+	 ('9d93adb9-4a93-4e26-998c-26349d9932a8',0,'unit',decode('67726176697479','hex'),3,'UNIT'),
+	 ('9d93adb9-4a93-4e26-998c-26349d9932a8',0,'symbol',decode('67','hex'),3,'SYMBOL'),
+	 ('9d93adb9-4a93-4e26-998c-26349d9932a8',1,'scale',decode('616363656C65726174696F6E2D59','hex'),3,'SCALE'),
+	 ('9d93adb9-4a93-4e26-998c-26349d9932a8',1,'unit',decode('67726176697479','hex'),3,'UNIT'),
+	 ('9d93adb9-4a93-4e26-998c-26349d9932a8',1,'symbol',decode('67','hex'),3,'SYMBOL'),
+	 ('9d93adb9-4a93-4e26-998c-26349d9932a8',2,'scale',decode('616363656C65726174696F6E2D5A','hex'),3,'SCALE'),
+	 ('9d93adb9-4a93-4e26-998c-26349d9932a8',2,'unit',decode('67726176697479','hex'),3,'UNIT'),
+	 ('9d93adb9-4a93-4e26-998c-26349d9932a8',2,'symbol',decode('67','hex'),3,'SYMBOL'),
+	 ('9d93adb9-4a93-4e26-998c-26349d9932a8',3,'scale',decode('696E636C696E6174696F6E2D58','hex'),3,'SCALE');
+INSERT INTO public.model_config (model_id,"index","name",value,"type",category) VALUES
+	 ('9d93adb9-4a93-4e26-998c-26349d9932a8',3,'unit',decode('646567726565','hex'),3,'UNIT'),
+	 ('9d93adb9-4a93-4e26-998c-26349d9932a8',3,'symbol',decode('C2B0','hex'),3,'SYMBOL'),
+	 ('9d93adb9-4a93-4e26-998c-26349d9932a8',4,'scale',decode('696E636C696E6174696F6E2D59','hex'),3,'SCALE'),
+	 ('9d93adb9-4a93-4e26-998c-26349d9932a8',4,'unit',decode('646567726565','hex'),3,'UNIT'),
+	 ('9d93adb9-4a93-4e26-998c-26349d9932a8',4,'symbol',decode('C2B0','hex'),3,'SYMBOL'),
+	 ('9d93adb9-4a93-4e26-998c-26349d9932a8',5,'scale',decode('646973706C6163656D656E742D58','hex'),3,'SCALE'),
+	 ('9d93adb9-4a93-4e26-998c-26349d9932a8',5,'unit',decode('6D696C6C696D65746572','hex'),3,'UNIT'),
+	 ('9d93adb9-4a93-4e26-998c-26349d9932a8',5,'symbol',decode('6D6D','hex'),3,'SYMBOL'),
+	 ('9d93adb9-4a93-4e26-998c-26349d9932a8',6,'scale',decode('646973706C6163656D656E742D59','hex'),3,'SCALE'),
+	 ('9d93adb9-4a93-4e26-998c-26349d9932a8',6,'unit',decode('6D696C6C696D65746572','hex'),3,'UNIT');
+INSERT INTO public.model_config (model_id,"index","name",value,"type",category) VALUES
+	 ('9d93adb9-4a93-4e26-998c-26349d9932a8',6,'symbol',decode('6D6D','hex'),3,'SYMBOL'),
+	 ('91b65b70-c421-42fa-8c54-16fc8bbed445',0,'scale',decode('7072657373757265','hex'),3,'SCALE'),
+	 ('91b65b70-c421-42fa-8c54-16fc8bbed445',0,'unit',decode('70617363616C','hex'),3,'UNIT'),
+	 ('91b65b70-c421-42fa-8c54-16fc8bbed445',0,'symbol',decode('7061','hex'),3,'SYMBOL'),
+	 ('91b65b70-c421-42fa-8c54-16fc8bbed445',1,'scale',decode('6465707468','hex'),3,'SCALE'),
+	 ('91b65b70-c421-42fa-8c54-16fc8bbed445',1,'unit',decode('6D696C6C696D65746572','hex'),3,'UNIT'),
+	 ('91b65b70-c421-42fa-8c54-16fc8bbed445',1,'symbol',decode('6D6D','hex'),3,'SYMBOL'),
+	 ('6a28ad85-0a32-41b8-acb5-ee92a523ec74',0,'scale',decode('7261696E20796573746572646179','hex'),3,'SCALE'),
+	 ('6a28ad85-0a32-41b8-acb5-ee92a523ec74',0,'unit',decode('6D696C6C696D65746572','hex'),3,'UNIT'),
+	 ('6a28ad85-0a32-41b8-acb5-ee92a523ec74',0,'symbol',decode('6D6D','hex'),3,'SYMBOL');
+INSERT INTO public.model_config (model_id,"index","name",value,"type",category) VALUES
+	 ('6a28ad85-0a32-41b8-acb5-ee92a523ec74',1,'scale',decode('7261696E206461696C79','hex'),3,'SCALE'),
+	 ('6a28ad85-0a32-41b8-acb5-ee92a523ec74',1,'unit',decode('6D696C6C696D65746572','hex'),3,'UNIT'),
+	 ('6a28ad85-0a32-41b8-acb5-ee92a523ec74',1,'symbol',decode('6D6D','hex'),3,'SYMBOL'),
+	 ('6a28ad85-0a32-41b8-acb5-ee92a523ec74',2,'scale',decode('7261696E206C61737420686F7572','hex'),3,'SCALE'),
+	 ('6a28ad85-0a32-41b8-acb5-ee92a523ec74',2,'unit',decode('6D696C6C696D65746572','hex'),3,'UNIT'),
+	 ('6a28ad85-0a32-41b8-acb5-ee92a523ec74',2,'symbol',decode('6D6D','hex'),3,'SYMBOL'),
+	 ('6a28ad85-0a32-41b8-acb5-ee92a523ec74',3,'scale',decode('7261696E20686F75726C79','hex'),3,'SCALE'),
+	 ('6a28ad85-0a32-41b8-acb5-ee92a523ec74',3,'unit',decode('6D696C6C696D65746572','hex'),3,'UNIT'),
+	 ('6a28ad85-0a32-41b8-acb5-ee92a523ec74',3,'symbol',decode('6D6D','hex'),3,'SYMBOL'),
+	 ('939909f1-798d-4073-88eb-e80a3b846e40',0,'scale',decode('74656D7065726174757265','hex'),3,'SCALE');
+INSERT INTO public.model_config (model_id,"index","name",value,"type",category) VALUES
+	 ('939909f1-798d-4073-88eb-e80a3b846e40',0,'unit',decode('63656C63697573','hex'),3,'UNIT'),
+	 ('939909f1-798d-4073-88eb-e80a3b846e40',0,'symbol',decode('C2B043','hex'),3,'SYMBOL'),
+	 ('939909f1-798d-4073-88eb-e80a3b846e40',1,'scale',decode('68756D6964697479','hex'),3,'SCALE'),
+	 ('939909f1-798d-4073-88eb-e80a3b846e40',1,'unit',decode('70657263656E74','hex'),3,'UNIT'),
+	 ('939909f1-798d-4073-88eb-e80a3b846e40',1,'symbol',decode('25','hex'),3,'SYMBOL'),
+	 ('939909f1-798d-4073-88eb-e80a3b846e40',2,'scale',decode('7072657373757265','hex'),3,'SCALE'),
+	 ('939909f1-798d-4073-88eb-e80a3b846e40',2,'unit',decode('6B696C6F2070617363616C','hex'),3,'UNIT'),
+	 ('939909f1-798d-4073-88eb-e80a3b846e40',2,'symbol',decode('6B5061','hex'),3,'SYMBOL');
+INSERT INTO public.model_type (model_id,"index","type") VALUES
+	 ('2f85c046-6851-4b80-8e6e-3698e9e707db',0,6),
+	 ('2f85c046-6851-4b80-8e6e-3698e9e707db',1,6),
+	 ('2f85c046-6851-4b80-8e6e-3698e9e707db',2,6),
+	 ('9d93adb9-4a93-4e26-998c-26349d9932a8',0,10),
+	 ('9d93adb9-4a93-4e26-998c-26349d9932a8',1,10),
+	 ('9d93adb9-4a93-4e26-998c-26349d9932a8',2,10),
+	 ('9d93adb9-4a93-4e26-998c-26349d9932a8',3,10),
+	 ('9d93adb9-4a93-4e26-998c-26349d9932a8',4,10),
+	 ('9d93adb9-4a93-4e26-998c-26349d9932a8',5,10),
+	 ('9d93adb9-4a93-4e26-998c-26349d9932a8',6,10);
+INSERT INTO public.model_type (model_id,"index","type") VALUES
+	 ('eb93788f-aa61-421c-916d-f7d6026256de',0,6),
+	 ('eb93788f-aa61-421c-916d-f7d6026256de',1,6),
+	 ('eb93788f-aa61-421c-916d-f7d6026256de',2,6),
+	 ('eb93788f-aa61-421c-916d-f7d6026256de',3,6),
+	 ('91b65b70-c421-42fa-8c54-16fc8bbed445',0,10),
+	 ('91b65b70-c421-42fa-8c54-16fc8bbed445',1,10),
+	 ('ed66830d-ce39-4dc9-a8f2-6eac3fef461f',0,6),
+	 ('ed66830d-ce39-4dc9-a8f2-6eac3fef461f',1,6),
+	 ('ed66830d-ce39-4dc9-a8f2-6eac3fef461f',2,6),
+	 ('ed66830d-ce39-4dc9-a8f2-6eac3fef461f',3,6);
+INSERT INTO public.model_type (model_id,"index","type") VALUES
+	 ('6a28ad85-0a32-41b8-acb5-ee92a523ec74',0,10),
+	 ('6a28ad85-0a32-41b8-acb5-ee92a523ec74',1,10),
+	 ('6a28ad85-0a32-41b8-acb5-ee92a523ec74',2,10),
+	 ('6a28ad85-0a32-41b8-acb5-ee92a523ec74',3,10),
+	 ('c16908e8-cc52-49bf-9619-03c1c79edfb3',0,6),
+	 ('c16908e8-cc52-49bf-9619-03c1c79edfb3',1,6),
+	 ('c16908e8-cc52-49bf-9619-03c1c79edfb3',2,6),
+	 ('939909f1-798d-4073-88eb-e80a3b846e40',0,10),
+	 ('939909f1-798d-4073-88eb-e80a3b846e40',1,10),
+	 ('939909f1-798d-4073-88eb-e80a3b846e40',2,10);
