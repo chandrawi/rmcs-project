@@ -110,13 +110,19 @@ while True:
             except grpc.RpcError as error:
                 print(error)
 
-        # delete buffer only if data on local exists for raw model 
-        # or update status to transfer server for data and analysis buffer
+        # delete or update status based on configuration
+        # raw model buffer configured separately
         try:
             if buffer.model_id in models_raw:
-                resource.delete_buffer(buffer.id)
+                if config.STATUS['transfer_local_raw'] == "DELETE":
+                    resource.delete_buffer(buffer.id)
+                else:
+                    resource.update_buffer(buffer.id, None, config.STATUS['transfer_local_raw'])
             else:
-                resource.update_buffer(buffer.id, None, "TRANSFER_SERVER")
+                if config.STATUS['transfer_local_end'] == "DELETE":
+                    resource.delete_buffer(buffer.id)
+                else:
+                    resource.update_buffer(buffer.id, None, config.STATUS['transfer_local_end'])
         except grpc.RpcError as error:
             print(error)
 

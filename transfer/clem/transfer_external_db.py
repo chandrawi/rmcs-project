@@ -155,7 +155,7 @@ while True:
     # read buffers
     buffers = []
     try:
-        buffers = resource.list_buffer_first(100, None, None, "EXTERNAL_OUTPUT")
+        buffers = resource.list_buffer_first(100, None, None, config.STATUS['transfer_external_db_begin'])
     except grpc.RpcError as error:
         if error.code() == grpc.StatusCode.UNAUTHENTICATED:
             login = auth.user_login(config.SERVER_LOCAL['admin_name'], config.SERVER_LOCAL['admin_password'])
@@ -195,9 +195,15 @@ while True:
         if external_exist:
             try:
                 if transfer_next:
-                    resource.update_buffer(buffer.id, None, 23)
+                    if config.STATUS['transfer_external_db_next'] == "DELETE":
+                        resource.delete_buffer(buffer.id)
+                    else:
+                        resource.update_buffer(buffer.id, None, config.STATUS['transfer_external_db_next'])
                 else:
-                    resource.delete_buffer(buffer.id)
+                    if config.STATUS['transfer_external_db_end'] == "DELETE":
+                        resource.delete_buffer(buffer.id)
+                    else:
+                        resource.update_buffer(buffer.id, None, config.STATUS['transfer_external_db_end'])
             except grpc.RpcError as error:
                 print(error)
 

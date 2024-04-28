@@ -109,7 +109,7 @@ while True:
     # read buffers
     buffers = []
     try:
-        buffers = resource.list_buffer_first(25, None, None, 23)
+        buffers = resource.list_buffer_first(25, None, None, config.STATUS['transfer_external_api_begin'])
     except grpc.RpcError as error:
         if error.code() == grpc.StatusCode.UNAUTHENTICATED:
             login = auth.user_login(config.SERVER_LOCAL['admin_name'], config.SERVER_LOCAL['admin_password'])
@@ -143,7 +143,10 @@ while True:
         # delete or update status based on configuration only if response code is 201
         if code == 201:
             try:
-                resource.delete_buffer(buffer.id)
+                if config.STATUS['transfer_external_api_end'] == "DELETE":
+                    resource.delete_buffer(buffer.id)
+                else:
+                    resource.update_buffer(buffer.id, None, config.STATUS['transfer_external_api_end'])
             except grpc.RpcError as error:
                 print(error)
 

@@ -195,7 +195,7 @@ for device in devices:
 while True:
 
     # read buffers
-    buffers = resource.list_buffer_first(10, None, None, "EXTERNAL_OUTPUT")
+    buffers = resource.list_buffer_first(10, None, None, config.STATUS['transfer_external_db_begin'])
 
     # create data from buffer
     for buffer in buffers:
@@ -230,7 +230,10 @@ while True:
         # delete buffer only if data on local and data on external server exists
         if external_exist:
             try:
-                resource.delete_buffer(buffer.id)
+                if config.STATUS['transfer_external_db_end'] == "DELETE":
+                    resource.delete_buffer(buffer.id)
+                else:
+                    resource.update_buffer(buffer.id, None, config.STATUS['transfer_external_db_end'])
             except Exception as error:
                 print(error)
 

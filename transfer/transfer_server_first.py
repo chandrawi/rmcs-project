@@ -101,10 +101,13 @@ while True:
                     main_exist = False
                     print(error)
 
-        # delete buffer only if buffer on main exists
+        # delete or update status based on configuration only if buffer on main exists
         if main_exist:
             try:
-                resource.delete_buffer(buffer.id)
+                if config.STATUS['transfer_server_end'] == "DELETE":
+                    resource.delete_buffer(buffer.id)
+                else:
+                    resource.update_buffer(buffer.id, None, config.STATUS['transfer_server_end'])
             except grpc.RpcError as error:
                 print(error)
 

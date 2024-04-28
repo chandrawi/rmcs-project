@@ -58,6 +58,19 @@ TIMING = {
     "max_drift": 0.5
 }
 
+STATUS = {
+    "logger_modbus_end": "ANALYSIS_1",
+    "logger_lora_end": "ANALYSIS_1",
+    "transfer_local_raw": "DELETE",
+    "transfer_local_end": "TRANSFER_SERVER",
+    "transfer_server_end": "DELETE",
+    "transfer_external_db_begin": "EXTERNAL_OUTPUT",
+    "transfer_external_db_end": "DELETE",
+    "transfer_external_db_next": 23,
+    "transfer_external_api_begin": 23,
+    "transfer_external_api_end": "DELETE"
+}
+
 EXTERNAL_API = {
     "token": "CUNeYi2wBCFKtsC4CbVbiOnoeYY89yKC",
     "url": "http://batubara.koneksi.cloud:8080/api/v1/report-start-finish"
