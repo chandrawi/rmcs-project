@@ -1,38 +1,68 @@
 #!/bin/bash
 
+# load variables from configuration file
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 CONF_FILE="${SCRIPT_DIR}/config.sh"
 source $CONF_FILE
 
+# get variables from argument to replace configuration variables
+while getopts u:p:b:e:t:d:D:M flag
+do
+	case "${flag}" in
+		u) DB_URL=${OPTARG};;
+		p) INPUT_PERIOD=${OPTARG};;
+		b) INPUT_BEGIN=${OPTARG};;
+		e) INPUT_END=${OPTARG};;
+		t) BACKUP_TABLE=${OPTARG};;
+		d) BACKUP_DIRECTORY=${OPTARG};;
+		D) GROUP_DEVICE=${OPTARG};;
+		M) GROUP_MODEL=${OPTARG};;
+	esac
+done
+
+# get period from argument if exists
+if [[ $INPUT_PERIOD =~ ^[0-9]+$ ]]; then
+	BACKUP_PERIOD=$INPUT_PERIOD
+fi
+# calculate begin and end datetime based on period
 EPOCH=$(date +%s)
 END_SEC=$((EPOCH - (EPOCH % BACKUP_PERIOD)))
 BEGIN_SEC=$((END_SEC - BACKUP_PERIOD))
-END=$(date +'%Y-%m-%d %H:%M:%S %z' -d "@$END_SEC")
-BEGIN=$(date +'%Y-%m-%d %H:%M:%S %z' -d "@$BEGIN_SEC")
-echo $BEGIN
-echo $END
+END=$(date +'%Y-%m-%dT%H:%M:%S%z' -d "@$END_SEC")
+BEGIN=$(date +'%Y-%m-%dT%H:%M:%S%z' -d "@$BEGIN_SEC")
+# get begin and end datetime from arguments if meet the format
+regex='[0-9]{2}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}([-+][0-9]{4})?$'
+if [[ $INPUT_BEGIN =~ $regex && $INPUT_END =~ $regex ]]; then
+	BEGIN=$INPUT_BEGIN
+	END=$INPUT_END
+fi
 
+# construct select query with between begin and end datetime filter
 COLUMNS="\"device_id\",\"model_id\",\"timestamp\",\"data\""
 if [ $BACKUP_TABLE = "data_buffer" ]; then
 	COLUMNS="\"device_id\",\"model_id\",\"timestamp\",\"data\",\"status\""
 fi
 QUERY="SELECT $COLUMNS FROM \"$BACKUP_TABLE\" WHERE \"timestamp\" >= '$BEGIN' AND \"timestamp\" < '$END'"
 
+# get variables if device or model group id match uuid pattern
 FILTER_FLAG=0
-if [[ $GROUP_MODEL =~ [[:xdigit:]]{8}-[[:xdigit:]]{4}-[[:xdigit:]]{4}-[[:xdigit:]]{4}-[[:xdigit:]]{12} ]]; then
+regex='[[:xdigit:]]{8}-[[:xdigit:]]{4}-[[:xdigit:]]{4}-[[:xdigit:]]{4}-[[:xdigit:]]{12}$'
+if [[ $GROUP_MODEL =~ $regex ]]; then
 	FILTER_FLAG=1
 	COL_ID=model_id
 	TB_GROUP=group_model
 	TB_MAP=group_model_map
 fi
-if [[ $GROUP_DEVICE =~ [[:xdigit:]]{8}-[[:xdigit:]]{4}-[[:xdigit:]]{4}-[[:xdigit:]]{4}-[[:xdigit:]]{12} ]]; then
+if [[ $GROUP_DEVICE =~ $regex ]]; then
 	FILTER_FLAG=1
 	COL_ID=device_id
 	TB_GROUP=group_device
 	TB_MAP=group_device_map
 fi
+# run a select query to get list of devices or models
 if [[ FILTER_FLAG -eq 1 ]]; then
 	RESULT=($(psql $DB_URL -AXqtc "SELECT \"${COL_ID}\" FROM \"${TB_GROUP}\" INNER JOIN \"${TB_MAP}\" USING (\"group_id\");"))
+# construct array of devices or models where clause query
 	if [[ ${#RESULT[@]} -gt 0 ]]; then
 		FILTER_ID="("
 		for res in "${RESULT[@]}"; do FILTER_ID+="'${res}',"; done
@@ -42,11 +72,13 @@ if [[ FILTER_FLAG -eq 1 ]]; then
 fi
 echo $QUERY
 
+# create backup directory and prepare backup file output path
 PREFIX="data"
 if [ $BACKUP_TABLE = "data_buffer" ]; then
 	PREFIX="buffer"
 fi
-BACKUP_PATH+="/$PREFIX"
-mkdir -p $BACKUP_PATH
+BACKUP_DIRECTORY+="/$PREFIX"
+mkdir -p $BACKUP_DIRECTORY
 
-psql $DB_URL -c "\copy ($QUERY) to '${BACKUP_PATH}/${PREFIX}_${BEGIN_SEC}.csv' with (format csv, header true);"
+# run copy command to a csv file for select query result on data or data_buffer table
+psql $DB_URL -c "\copy ($QUERY) to '${BACKUP_DIRECTORY}/${PREFIX}_${BEGIN_SEC}.csv' with (format csv, header true);"
