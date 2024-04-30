@@ -48,9 +48,18 @@ GATEWAY_LORA = {
     }
 }
 
+GATEWAY_ENVIRONMENT = {
+    "00000000-0000-0000-0000-000000000000": {
+        "period_time": 60,
+        "bus": "/dev/i2c-2",
+        "address": 0x76
+    }
+}
+
 GATEWAYS = []
 for k in GATEWAY_MODBUS: GATEWAYS.append(k)
 for k in GATEWAY_LORA: GATEWAYS.append(k)
+for k in GATEWAY_ENVIRONMENT: GATEWAYS.append(k)
 
 TIMING = {
     "transfer_sleep": 1,
@@ -61,6 +70,7 @@ TIMING = {
 STATUS = {
     "logger_modbus_end": "ANALYSIS_1",
     "logger_lora_end": "ANALYSIS_1",
+    "logger_environment_end": "TRANSFER_LOCAL",
     "transfer_local_raw": "DELETE",
     "transfer_local_end": "TRANSFER_SERVER",
     "transfer_server_end": "DELETE",

@@ -4,7 +4,7 @@ INSERT INTO public.group_model_map (group_id,model_id) VALUES
 	 ('7a4ebb58-864c-4385-964c-0c6f77dab237','eb93788f-aa61-421c-916d-f7d6026256de'),
 	 ('7a4ebb58-864c-4385-964c-0c6f77dab237','ed66830d-ce39-4dc9-a8f2-6eac3fef461f'),
 	 ('7a4ebb58-864c-4385-964c-0c6f77dab237','2f85c046-6851-4b80-8e6e-3698e9e707db'),
-	 ('7a4ebb58-864c-4385-964c-0c6f77dab237','c16908e8-cc52-49bf-9619-03c1c79edfb3');
+	 ('7a4ebb58-864c-4385-964c-0c6f77dab237','939909f1-798d-4073-88eb-e80a3b846e40');
 INSERT INTO public.group_device (group_id,"name",kind,category,description) VALUES
 	 ('ba4f7f60-d41b-453b-93ee-e8e0f0083c7a','soil inclinometer',false,'ANALYSIS','soil inclinometer testing');
 INSERT INTO public.group_device_map (group_id,device_id) VALUES

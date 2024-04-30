@@ -7,7 +7,8 @@ INSERT INTO public.device (device_id,gateway_id,type_id,serial_number,"name",des
 	 ('3676235b-195d-4c63-bfc4-f9abb1590d77','39682460-6af2-4b36-89ff-9d54e98cbbb5','eea82bb2-d427-4081-890d-c7c4795fd6f7','TESTACC05','Accelerometer_5','soil inclinometer 5 testing'),
 	 ('d86ab73a-9b02-4117-9bb9-8e900c859396','39682460-6af2-4b36-89ff-9d54e98cbbb5','3b48c722-766a-4cc4-8fe9-cf7d8a3cff69','TESTPIE01','Piezometer_1','piezometer testing'),
 	 ('ff38c507-73ea-49bd-8093-51f5f052cb72','39682460-6af2-4b36-89ff-9d54e98cbbb5','24709a09-0cf3-47e4-9080-efa7cd2860be','TESTRAG01','Rain_Gauge_1','rain gauge testing'),
-	 ('2ec7f527-2377-4a10-ae57-c590eafd07f1','39682460-6af2-4b36-89ff-9d54e98cbbb5','99f387e1-e082-4e52-9f03-f2a6fa3f3e35','TESTENV01','Environment_Sensor_1','environment sensor testing');
+	 ('50b422ce-20ef-4740-bee8-7c414f7af47d','50b422ce-20ef-4740-bee8-7c414f7af47d','e0902405-9a96-497a-8fab-2deb007d8a0f','GATE02','Gateway_2',''),
+	 ('2ec7f527-2377-4a10-ae57-c590eafd07f1','50b422ce-20ef-4740-bee8-7c414f7af47d','99f387e1-e082-4e52-9f03-f2a6fa3f3e35','TESTENV01','Environment_Sensor_1','environment sensor testing');
 INSERT INTO public.device_config (device_id,"name",value,"type",category) VALUES
 	 ('5e7c4ea6-b6f3-4198-ae14-9888bf437cf1','slave_id',decode('0000000000000001','hex'),1,'COMMUNICATION'),
 	 ('5e7c4ea6-b6f3-4198-ae14-9888bf437cf1','offset-X',decode('0000000000000000','hex'),1,'OFFSET'),
