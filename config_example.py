@@ -72,6 +72,8 @@ STATUS = {
     "logger_lora_end": "ANALYSIS_1",
     "logger_environment_end": "TRANSFER_LOCAL",
     "transfer_local_raw": "DELETE",
+    "transfer_local_data": "TRANSFER_SERVER",
+    "transfer_local_analysis": "TRANSFER_SERVER",
     "transfer_local_end": "TRANSFER_SERVER",
     "transfer_server_end": "DELETE",
     "transfer_external_db_begin": "EXTERNAL_OUTPUT",

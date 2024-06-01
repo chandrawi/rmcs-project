@@ -113,16 +113,17 @@ while True:
         # delete or update status based on configuration
         # raw model buffer configured separately
         try:
-            if buffer.model_id in models_raw:
-                if config.STATUS['transfer_local_raw'] == "DELETE":
-                    resource.delete_buffer(buffer.id)
-                else:
-                    resource.update_buffer(buffer.id, None, config.STATUS['transfer_local_raw'])
+            status = config.STATUS['transfer_local_end']
+            if buffer.model_id in models_raw: 
+                status = config.STATUS['transfer_local_raw']
+            elif buffer.model_id in models_data:
+                status = config.STATUS['transfer_local_data']
+            elif buffer.model_id in models_analysis:
+                status = config.STATUS['transfer_local_analysis']
+            if status == "DELETE":
+                resource.delete_buffer(buffer.id)
             else:
-                if config.STATUS['transfer_local_end'] == "DELETE":
-                    resource.delete_buffer(buffer.id)
-                else:
-                    resource.update_buffer(buffer.id, None, config.STATUS['transfer_local_end'])
+                resource.update_buffer(buffer.id, None, status)
         except grpc.RpcError as error:
             print(error)
 
