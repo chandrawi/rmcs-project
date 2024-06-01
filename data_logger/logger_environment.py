@@ -66,8 +66,8 @@ for device in device_map:
 # read temperature, pressure, and humidity for the first time
 for device in device_map:
     bme280.get_temperature()
-    bme280.get_pressure()
     bme280.get_humidity()
+    bme280.get_pressure()
 time.sleep(0.1)
 
 while True:
@@ -81,11 +81,11 @@ while True:
     for device in device_map:
 
         try:
-            # get temperature, pressure, and humidity from sensor
+            # get temperature, humidity, and pressure from sensor
             temperature = bme280.get_temperature()
-            pressure = bme280.get_pressure()
             humidity = bme280.get_humidity()
-            data = [temperature, pressure, humidity]
+            pressure = bme280.get_pressure()
+            data = [temperature, humidity, pressure]
             print("{0}    {1}    {2}".format(now_str, device.id, data))
 
             # Create buffer with data from request data

@@ -20,8 +20,7 @@ resource = Resource(address_resource, login.access_tokens[0].access_token)
 # create data model and add data types and configs
 model_map = {}
 for key, model in MODELS.items():
-    model_id = resource.create_model(uuid.uuid4(), model.category, model.name, model.description)
-    resource.add_model_type(model_id, model.types)
+    model_id = resource.create_model(uuid.uuid4(), model.data_type, model.category, model.name, model.description)
     for index, configs in enumerate(model.configs):
         for conf in configs:
             resource.create_model_config(model_id, index, conf.name, conf.value, conf.category)

@@ -9,13 +9,13 @@ import config
 
 
 PROCEDURES_ADMIN = [
-    "read_model", "create_model", "update_model", "delete_model", "change_model_type",
+    "read_model", "create_model", "update_model", "delete_model",
     "read_model_config", "create_model_config", "update_model_config", "delete_model_config", 
     "read_device", "create_device", "update_device", "delete_device",
     "read_device_config", "create_device_config", "update_device_config", "delete_device_config", 
     "read_type", "create_type", "update_type", "delete_type", "change_type_model",
     "read_group", "create_group", "update_group", "delete_group", "change_group_member",
-    "read_data", "get_data_model", "read_data_with_model", "create_data", "delete_data",
+    "read_data", "create_data", "delete_data",
     "read_buffer", "create_buffer", "update_buffer", "delete_buffer",
     "read_slice", "create_slice", "update_slice", "delete_slice",
     "read_log", "create_log", "update_log", "delete_log"

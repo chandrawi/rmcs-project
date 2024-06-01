@@ -72,8 +72,7 @@ for device in devices:
 
 # create data model and add data types and configs on main server
 for model in models:
-    resource_main.create_model(model.id, model.category, model.name, model.description)
-    resource_main.add_model_type(model.id, model.types)
+    resource_main.create_model(model.id, model.data_type, model.category, model.name, model.description)
     for index, configs in enumerate(model.configs):
         for conf in configs:
             resource_main.create_model_config(model.id, index, conf.name, conf.value, conf.category)

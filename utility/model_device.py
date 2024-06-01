@@ -13,7 +13,7 @@ class Model:
     category: str
     name: str
     description: str
-    types: List[DataType]
+    data_type: List[DataType]
     configs: List[List[ModelConfig]]
 
 @dataclass

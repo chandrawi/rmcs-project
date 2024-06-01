@@ -9,3 +9,4 @@ pytest
 pyserial
 pymodbus
 spidev
+smbus2
