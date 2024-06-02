@@ -28,17 +28,19 @@ if [[ $INPUT_PERIOD =~ ^[0-9]+$ ]]; then
 	BACKUP_PERIOD=$INPUT_PERIOD
 fi
 # calculate begin and end datetime based on period
-EPOCH=$(date +%s)
-END_SEC=$((EPOCH - (EPOCH % BACKUP_PERIOD)))
+TZ=$(date +%z)
+OFFSET=$((0 ${TZ:0:1} (${TZ:1:2} * 3600 + ${TZ:3:2} * 60)))
+EPOCH=$(($(date +%s) + OFFSET))
+END_SEC=$((EPOCH - (EPOCH % BACKUP_PERIOD) - OFFSET))
 BEGIN_SEC=$((END_SEC - BACKUP_PERIOD))
-END=$(date +'%Y-%m-%dT%H:%M:%S%z' -d "@$END_SEC")
-BEGIN=$(date +'%Y-%m-%dT%H:%M:%S%z' -d "@$BEGIN_SEC")
 # get begin and end datetime from arguments if meet the format
 regex='[0-9]{2}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}([-+][0-9]{4})?$'
 if [[ $INPUT_BEGIN =~ $regex && $INPUT_END =~ $regex ]]; then
-	BEGIN=$INPUT_BEGIN
-	END=$INPUT_END
+	BEGIN_SEC=$(date -d$INPUT_BEGIN +%s)
+	END_SEC=$(date -d$INPUT_END +%s)
 fi
+BEGIN=$(date +'%Y-%m-%dT%H:%M:%S%z' -d "@$BEGIN_SEC")
+END=$(date +'%Y-%m-%dT%H:%M:%S%z' -d "@$END_SEC")
 
 # construct select query with between begin and end datetime filter
 COLUMNS="\"device_id\",\"model_id\",\"timestamp\",\"data\""
@@ -106,9 +108,9 @@ psql $DB_URL -c "\copy ($QUERY) to '$BACKUP_PATH' with (format csv, header true)
 
 # delete data after backup if delete flag is true
 if [[ $DELETE_FLAG -eq 1 ]]; then
-	QUERY="DELETE \"$BACKUP_TABLE\" WHERE $COL_TS >= '$BEGIN' AND $COL_TS < '$END'"
+	QUERY="DELETE FROM \"$BACKUP_TABLE\" WHERE $COL_TS >= '$BEGIN' AND $COL_TS < '$END'"
 	if [[ ${#RESULT[@]} -gt 0 ]]; then
 		QUERY+=" AND \"${COL_ID}\" IN ${FILTER_ID}"
 	fi
-	psql $DB_URL -c $QUERY
+	psql $DB_URL -c "$QUERY"
 fi
