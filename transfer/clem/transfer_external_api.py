@@ -25,7 +25,7 @@ def getDateShift(timestamp: datetime.datetime) -> tuple[datetime.date, int]:
         return (dt.date(), 2)
 
 def post_running_hour_sensor(
-        equipment_id: UUID, 
+        serial_number: str, 
         date: datetime.date, 
         shift: int, 
         time_begin: datetime.datetime, 
@@ -33,9 +33,9 @@ def post_running_hour_sensor(
         index: int
     ):
     payloads = {
-        "date": date.strftime("%d-%m-%Y"),
+        "date": date.strftime("%Y-%m-%d"),
         "shift": "shift_" + str(shift),
-        "unique_code": str(equipment_id),
+        "unique_code": str(serial_number),
         "hour_type": "jam_ke_" + str(index),
         "start": time_begin.strftime("%H:%M:%S"),
         "finish": time_end.strftime("%H:%M:%S")
@@ -46,7 +46,7 @@ def post_running_hour_sensor(
     r = requests.post(config.EXTERNAL_API["url"], json=payloads, headers=headers)
     return r.status_code
 
-def transfer_external_api(model: ModelSchema, equipment_id: UUID, timestamp: datetime.datetime, data: list):
+def transfer_external_api(model: ModelSchema, serial_number: str, timestamp: datetime.datetime, data: list):
     if model.name == "running hour sensor":
         try:
             index = 1
@@ -56,7 +56,7 @@ def transfer_external_api(model: ModelSchema, equipment_id: UUID, timestamp: dat
                 duration = data[1]
             date, shift = getDateShift(timestamp)
             time_end = timestamp + datetime.timedelta(seconds=duration)
-            return post_running_hour_sensor(equipment_id, date, shift, timestamp, time_end, index)
+            return post_running_hour_sensor(serial_number, date, shift, timestamp, time_end, index)
         except Exception as error:
             print(error)
             return 0
@@ -100,8 +100,8 @@ for gateway_id in config.GATEWAYS:
 print("DEVICES:")
 device_map = {}
 for device in devices:
-    print("{}: {}".format(device.id, device.name))
-    device_map[device.id] = device.name
+    print("{}: {}  {}".format(device.id, device.serial_number, device.name))
+    device_map[device.id] = device.serial_number
 
 
 while True:
@@ -132,7 +132,7 @@ while True:
         code = 0
         try:
             if buffer.model_id in model_map:
-                code = transfer_external_api(model_map[buffer.model_id], buffer.device_id, buffer.timestamp, buffer.data)
+                code = transfer_external_api(model_map[buffer.model_id], device_map[buffer.device_id], buffer.timestamp, buffer.data)
         except Exception as error:
             print(error)
 

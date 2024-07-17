@@ -92,15 +92,18 @@ def read_running_hour_sensor(
     params = (equipment_id, time_begin, time_end)
     return fetchone(query, params)
 
-def transfer_external_server(model: ModelSchema, equipment_id: UUID, timestamp: datetime, data: list):
+def transfer_external_server(model: ModelSchema, equipment_id: UUID, timestamp: datetime, data: list) -> bool:
     if model.name == "running hour basic data":
         create_running_hour_data(equipment_id, timestamp, data[0], data[1], data[2], data[3], data[4], data[5])
+        return False
     elif model.name == "running hour sensor":
         date, shift = getDateShift(timestamp)
         time_end = timestamp + timedelta(seconds=data[1])
         create_running_hour_sensor(equipment_id, date, shift, timestamp, time_end, data[0])
+        return True
     else:
         print("Model is not recognized")
+        return False
 
 def check_external_server(model: ModelSchema, equipment_id: UUID, timestamp: datetime, data: list = []) -> bool:
     if model.name == "running hour basic data":
