@@ -82,7 +82,7 @@ if [[ $GROUP_DEVICE =~ $regex ]]; then
 fi
 # run a select query to get list of devices or models
 if [[ FILTER_FLAG -gt 0 ]]; then
-	RESULT=($(psql $DB_URL -AXqtc "SELECT \"${COL_ID}\" FROM \"${TB_GROUP}\" INNER JOIN \"${TB_MAP}\" USING (\"group_id\");"))
+	RESULT=($(psql $DB_URL -AXqtc "SELECT \"${COL_ID}\" FROM \"${TB_GROUP}\" INNER JOIN \"${TB_MAP}\" USING (\"group_id\") WHERE \"group_id\"='${SUFFIX}';"))
 # construct where clause query with array of devices or models
 	if [[ ${#RESULT[@]} -gt 0 ]]; then
 		FILTER_ID="("

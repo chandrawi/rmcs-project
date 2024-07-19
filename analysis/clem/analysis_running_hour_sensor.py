@@ -95,6 +95,9 @@ while True:
 
     if command != None:
 
+        # get a device schema based on buffer
+        device = device_map[command.device_id]
+
         # Get all running hour basic data of a device between begin and end working shift
         # device_ids = list(device_map.keys())
         shift_period = int(command.data[0])
