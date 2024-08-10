@@ -10,6 +10,13 @@ from rmcs_api_client.resource import Resource, ModelSchema, DeviceSchema
 import config
 
 
+# Get default gateway ID or ID from input argument and then get corresponding configurations from config file
+buffer_number = 100
+buffer_offset = 0
+if len(sys.argv) > 2:
+    buffer_number = int(sys.argv[1])
+    buffer_offset = int(sys.argv[2])
+
 def execute(query, params):
     with psycopg.connect(config.DATABASE['url_external']) as conn:
         with conn.cursor() as cur:
@@ -195,7 +202,7 @@ for device in devices:
 while True:
 
     # read buffers
-    buffers = resource.list_buffer_first(10, None, None, config.STATUS['transfer_external_db_begin'])
+    buffers = resource.list_buffer_first_offset(buffer_number, buffer_offset, None, None, config.STATUS['transfer_external_db_begin'])
 
     # create data from buffer
     for buffer in buffers:

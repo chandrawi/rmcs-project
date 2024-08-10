@@ -11,6 +11,13 @@ from rmcs_api_client.resource import Resource, DeviceSchema
 import config
 
 
+# Get default gateway ID or ID from input argument and then get corresponding configurations from config file
+buffer_number = 100
+buffer_offset = 0
+if len(sys.argv) > 2:
+    buffer_number = int(sys.argv[1])
+    buffer_offset = int(sys.argv[2])
+
 # user login on local server
 address_auth = config.SERVER_LOCAL['address_auth']
 address_resource = config.SERVER_LOCAL['address_resource']
@@ -69,7 +76,7 @@ while True:
 
     buffers = []
     try:
-        buffers = resource.list_buffer_first(100, None, None, "TRANSFER_LOCAL")
+        buffers = resource.list_buffer_first_offset(buffer_number, buffer_offset, None, None, "TRANSFER_LOCAL")
     except grpc.RpcError as error:
         if error.code() == grpc.StatusCode.UNAUTHENTICATED:
             login = auth.user_login(config.SERVER_LOCAL['admin_name'], config.SERVER_LOCAL['admin_password'])

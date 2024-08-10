@@ -11,6 +11,13 @@ from rmcs_api_client.resource import Resource, ModelSchema, DeviceSchema
 import config
 
 
+# Get default gateway ID or ID from input argument and then get corresponding configurations from config file
+buffer_number = 100
+buffer_offset = 0
+if len(sys.argv) > 2:
+    buffer_number = int(sys.argv[1])
+    buffer_offset = int(sys.argv[2])
+
 # Shift period in seconds and offset from 00:00:00 in seconds
 DAY_IN_SEC = 86400
 SHIFT_PERIOD = 43200
@@ -158,7 +165,7 @@ while True:
     # read buffers
     buffers = []
     try:
-        buffers = resource.list_buffer_first(100, None, None, config.STATUS['transfer_external_db_begin'])
+        buffers = resource.list_buffer_first_offset(buffer_number, buffer_offset, None, None, config.STATUS['transfer_external_db_begin'])
     except grpc.RpcError as error:
         if error.code() == grpc.StatusCode.UNAUTHENTICATED:
             login = auth.user_login(config.SERVER_LOCAL['admin_name'], config.SERVER_LOCAL['admin_password'])

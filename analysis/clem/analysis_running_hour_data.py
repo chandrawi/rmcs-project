@@ -25,6 +25,13 @@ class Device:
     running_ths: float
 
 
+# Get default gateway ID or ID from input argument and then get corresponding configurations from config file
+buffer_number = 100
+buffer_offset = 0
+if len(sys.argv) > 2:
+    buffer_number = int(sys.argv[1])
+    buffer_offset = int(sys.argv[2])
+
 # User login on local server
 address_auth = config.SERVER_LOCAL['address_auth']
 address_resource = config.SERVER_LOCAL['address_resource']
@@ -111,7 +118,7 @@ while True:
     buffers = []
     try:
         # read buffer based on raw model
-        buffers = resource.list_buffer_first(10, None, model_raw.id, "ANALYSIS_1")
+        buffers = resource.list_buffer_first_offset(buffer_number, buffer_offset, None, model_raw.id, "ANALYSIS_1")
     except grpc.RpcError as error:
         if error.code() == grpc.StatusCode.UNAUTHENTICATED:
             login = auth.user_login(config.SERVER_LOCAL['admin_name'], config.SERVER_LOCAL['admin_password'])
