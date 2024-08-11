@@ -14,13 +14,23 @@ do
 	for i in "${!TRANSFER_SCRIPTS[@]}"; do
 		if [[ ${TRANSFER_SCRIPTS[$i]:0:1} = "/" ]]; then
 
-			SCRIPT_COMMAND="${BASE_PATH}${TRANSFER_SCRIPTS[$i]}"
+			# append buffer number and offset as command arguments
+			SCRIPT_PATH="${BASE_PATH}${TRANSFER_SCRIPTS[$i]}"
+			SCRIPT_COMMAND=$SCRIPT_PATH
+			regex='^[[:digit:]]+$'
+			if [[ ${TRANSFER_SCRIPTS[$i+1]} =~ $regex ]]; then
+				SCRIPT_COMMAND+=" ${TRANSFER_SCRIPTS[$i+1]}"
+			fi
+			if [[ ${TRANSFER_SCRIPTS[$i+2]} =~ $regex ]]; then
+				SCRIPT_COMMAND+=" ${TRANSFER_SCRIPTS[$i+2]}"
+			fi
 
-			logger=$(pgrep -a python | grep -c $SCRIPT_COMMAND)
-			if [ $logger -eq 0 ]
+			number=$(pgrep -a python | grep -c "$SCRIPT_COMMAND")
+			if [ $number -eq 0 ]
 			then
 
-				printf "rerun transfer script...\n"
+				DATE=$(date +"%Y-%m-%d %H:%M:%S")
+				echo "$DATE    rerun transfer script...\n"
 				sudo $PYTHON_PATH $SCRIPT_COMMAND &
 
 			fi
