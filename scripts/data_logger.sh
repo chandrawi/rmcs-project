@@ -46,6 +46,6 @@ do
 		fi
 	done
 
-	sleep $CHECK_DURATION_LOGGER
+	sleep $CHECK_LOGGER_INTERVAL
 
 done

@@ -44,6 +44,6 @@ do
 		fi
 	done
 
-	sleep $CHECK_DURATION_LOGGER
+	sleep $CHECK_ANALYSIS_INTERVAL
 
 done

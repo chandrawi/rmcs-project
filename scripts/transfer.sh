@@ -37,6 +37,6 @@ do
 		fi
 	done
 
-	sleep $CHECK_DURATION_LOGGER
+	sleep $CHECK_TRANSFER_INTERVAL
 
 done
