@@ -80,7 +80,7 @@ while True:
         try:
             # Request data to the modbus device based on its type
             data = []
-            if device.type == "soil inclinometer":
+            if device.type == "soil inclinometer" or device.type == "inclinometer array":
                 rr = client.read_input_registers(slave=device.slave_id, address=0x00, count=3)
                 data = rr.registers
             elif device.type == "piezometer":

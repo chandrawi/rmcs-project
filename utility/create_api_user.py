@@ -15,13 +15,14 @@ PROCEDURES_ADMIN = [
     "read_device_config", "create_device_config", "update_device_config", "delete_device_config", 
     "read_type", "create_type", "update_type", "delete_type", "change_type_model",
     "read_group", "create_group", "update_group", "delete_group", "change_group_member",
+    "read_set", "create_set", "update_set", "delete_set", "change_set_member",
     "read_data", "create_data", "delete_data",
     "read_buffer", "create_buffer", "update_buffer", "delete_buffer",
     "read_slice", "create_slice", "update_slice", "delete_slice",
     "read_log", "create_log", "update_log", "delete_log"
 ]
 PROCEDURES_USER = [
-    "read_model", "read_model_config", "read_device", "read_device_config", "read_type", "read_group",
+    "read_model", "read_model_config", "read_device", "read_device_config", "read_type", "read_group", "read_set",
     "read_data", "read_buffer", "read_slice", "read_log"
 ]
 PROCEDURES = set(PROCEDURES_ADMIN + PROCEDURES_USER)

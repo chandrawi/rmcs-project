@@ -37,7 +37,7 @@ do
 			then
 
 				DATE=$(date +"%Y-%m-%d %H:%M:%S")
-				echo "$DATE    rerun transfer script...\n"
+				echo "$DATE    rerun analysis script...\n"
 				sudo $PYTHON_PATH $SCRIPT_COMMAND &
 
 			fi
