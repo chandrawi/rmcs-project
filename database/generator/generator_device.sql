@@ -1,0 +1,27 @@
+INSERT INTO public.device (device_id,gateway_id,type_id,serial_number,name,description) VALUES
+	 ('ead52a04-ac6c-401d-a3ae-881daa01e958'::uuid,'ead52a04-ac6c-401d-a3ae-881daa01e958'::uuid,'e0902405-9a96-497a-8fab-2deb007d8a0f'::uuid,'GENGW','Generator gateway','Gateway for data generator'),
+	 ('a1c35b55-8a36-48d8-94d8-e389e9301dfe'::uuid,'ead52a04-ac6c-401d-a3ae-881daa01e958'::uuid,'32379c0a-a849-45cf-a6e6-2b314b86545d'::uuid,'GENINT01','Integer generator 1','Integer generator 1'),
+	 ('a23bbcce-153b-4bb5-82ae-93d939db3f0b'::uuid,'ead52a04-ac6c-401d-a3ae-881daa01e958'::uuid,'32379c0a-a849-45cf-a6e6-2b314b86545d'::uuid,'GENINT02','Integer generator 2','Integer generator 2'),
+	 ('b18820e1-c1df-4606-aa89-c03067bc87f5'::uuid,'ead52a04-ac6c-401d-a3ae-881daa01e958'::uuid,'d190ac36-ce89-42fc-ab77-7a029674278c'::uuid,'GENFLO01','Float generator 1','Float generator 1'),
+	 ('b2f5a792-7b81-4e79-b33c-f699820b7fd1'::uuid,'ead52a04-ac6c-401d-a3ae-881daa01e958'::uuid,'d190ac36-ce89-42fc-ab77-7a029674278c'::uuid,'GENFLO02','Float generator 2','Float generator 2');
+INSERT INTO public.device_config (device_id,name,value,"type",category) VALUES
+	 ('a1c35b55-8a36-48d8-94d8-e389e9301dfe'::uuid,'upper_limit_1',decode('00000064','hex'),3,'GENERATOR'),
+	 ('a1c35b55-8a36-48d8-94d8-e389e9301dfe'::uuid,'lower_limit_1',decode('00000000','hex'),3,'GENERATOR'),
+	 ('a1c35b55-8a36-48d8-94d8-e389e9301dfe'::uuid,'upper_limit_2',decode('000003E8','hex'),3,'GENERATOR'),
+	 ('a1c35b55-8a36-48d8-94d8-e389e9301dfe'::uuid,'lower_limit_2',decode('FFFFFC18','hex'),3,'GENERATOR'),
+	 ('a23bbcce-153b-4bb5-82ae-93d939db3f0b'::uuid,'upper_limit_1',decode('00000064','hex'),3,'GENERATOR'),
+	 ('a23bbcce-153b-4bb5-82ae-93d939db3f0b'::uuid,'lower_limit_1',decode('00000000','hex'),3,'GENERATOR'),
+	 ('a23bbcce-153b-4bb5-82ae-93d939db3f0b'::uuid,'upper_limit_2',decode('000003E8','hex'),3,'GENERATOR'),
+	 ('a23bbcce-153b-4bb5-82ae-93d939db3f0b'::uuid,'lower_limit_2',decode('FFFFFC18','hex'),3,'GENERATOR'),
+	 ('b18820e1-c1df-4606-aa89-c03067bc87f5'::uuid,'upper_limit_1',decode('412E848000000000','hex'),13,'GENERATOR'),
+	 ('b18820e1-c1df-4606-aa89-c03067bc87f5'::uuid,'lower_limit_1',decode('C12E848000000000','hex'),13,'GENERATOR'),
+	 ('b18820e1-c1df-4606-aa89-c03067bc87f5'::uuid,'precission_1',decode('00000002','hex'),3,'GENERATOR'),
+	 ('b18820e1-c1df-4606-aa89-c03067bc87f5'::uuid,'upper_limit_2',decode('3FF0000000000000','hex'),13,'GENERATOR'),
+	 ('b18820e1-c1df-4606-aa89-c03067bc87f5'::uuid,'lower_limit_2',decode('BFF0000000000000','hex'),13,'GENERATOR'),
+	 ('b18820e1-c1df-4606-aa89-c03067bc87f5'::uuid,'precission_2',decode('00000006','hex'),3,'GENERATOR'),
+	 ('b2f5a792-7b81-4e79-b33c-f699820b7fd1'::uuid,'upper_limit_1',decode('412E848000000000','hex'),13,'GENERATOR'),
+	 ('b2f5a792-7b81-4e79-b33c-f699820b7fd1'::uuid,'lower_limit_1',decode('C12E848000000000','hex'),13,'GENERATOR'),
+	 ('b2f5a792-7b81-4e79-b33c-f699820b7fd1'::uuid,'precission_1',decode('00000002','hex'),3,'GENERATOR'),
+	 ('b2f5a792-7b81-4e79-b33c-f699820b7fd1'::uuid,'upper_limit_2',decode('3FF0000000000000','hex'),13,'GENERATOR'),
+	 ('b2f5a792-7b81-4e79-b33c-f699820b7fd1'::uuid,'lower_limit_2',decode('BFF0000000000000','hex'),13,'GENERATOR'),
+	 ('b2f5a792-7b81-4e79-b33c-f699820b7fd1'::uuid,'precission_2',decode('00000006','hex'),3,'GENERATOR');
