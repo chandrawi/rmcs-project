@@ -19,6 +19,25 @@ if invalid:
 
 ser = serial.Serial(GATEWAY['serial_port'], 9600, timeout=1)
 
+# SCL3300 inclinometer X, Y, Z inclination with 0x01 and 0x02 addresses
+print("SCL3300 inclinometer")
+commands = [
+    b"\x01\x04\x00\x04\x00\x04\xB0\x08",
+    b"\x02\x04\x00\x04\x00\x04\xB0\x3B",
+    b"\x03\x04\x00\x04\x00\x04\xB1\xEA",
+    b"\x04\x04\x00\x04\x00\x04\xB0\x5D"
+]
+for i, command in enumerate(commands):
+    ser.write(command)
+    s = ser.read(13)
+    angle_x = s[3] * 2**8 + s[4]
+    angle_y = s[5] * 2**8 + s[6]
+    angle_z = s[7] * 2**8 + s[8]
+    if angle_x >= 2**15 : angle_x = angle_x - 2**16
+    if angle_y >= 2**15 : angle_y = angle_y - 2**16
+    if angle_z >= 2**15 : angle_z = angle_z - 2**16
+    print("    Angle {0:1d} (X|Y|Z): {1:5d} | {2:5d} | {3:5d}".format(i, angle_x, angle_y, angle_z))
+
 # Soil inclinometer X, Y, and Z acceleration with 0x01 to 0x05 addresses
 print("Soil Inclinometer")
 commands = [

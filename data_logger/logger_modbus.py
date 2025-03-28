@@ -83,6 +83,9 @@ while True:
             if device.type == "soil inclinometer" or device.type == "inclinometer array":
                 rr = client.read_input_registers(slave=device.slave_id, address=0x00, count=3)
                 data = rr.registers
+            elif device.type == "SCL3300 inclinometer array":
+                rr = client.read_input_registers(slave=device.slave_id, address=0x04, count=4)
+                data = rr.registers
             elif device.type == "piezometer":
                 rr = client.read_input_registers(slave=device.slave_id, address=0x10, count=6)
                 data = [rr.registers[0], rr.registers[1], rr.registers[3], rr.registers[4]]
