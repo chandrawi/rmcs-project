@@ -28,6 +28,12 @@ API = {
     "password": "Ap1_P4s5w0rd"
 }
 
+GATEWAY_GENERATOR = {
+    "00000000-0000-0000-0000-000000000000": {
+        "period_time": 60
+    }
+}
+
 GATEWAY_MODBUS = {
     "00000000-0000-0000-0000-000000000000": {
         "period_time": 60,
@@ -48,6 +54,14 @@ GATEWAY_LORA = {
     }
 }
 
+GATEWAY_POWER_MONITORING = {
+    "00000000-0000-0000-0000-000000000000": {
+        "period_time": 300,
+        "period_monitor": 5,
+        "bus": "/dev/i2c-2"
+    }
+}
+
 GATEWAY_ENVIRONMENT = {
     "00000000-0000-0000-0000-000000000000": {
         "period_time": 60,
@@ -57,8 +71,10 @@ GATEWAY_ENVIRONMENT = {
 }
 
 GATEWAYS = []
+for k in GATEWAY_GENERATOR: GATEWAYS.append(k)
 for k in GATEWAY_MODBUS: GATEWAYS.append(k)
 for k in GATEWAY_LORA: GATEWAYS.append(k)
+for k in GATEWAY_POWER_MONITORING: GATEWAYS.append(k)
 for k in GATEWAY_ENVIRONMENT: GATEWAYS.append(k)
 
 TIMING = {
@@ -71,6 +87,7 @@ STATUS = {
     "logger_modbus_end": "ANALYSIS_1",
     "logger_lora_end": "ANALYSIS_1",
     "logger_environment_end": "TRANSFER_LOCAL",
+    "logger_power_end": "TRANSFER_LOCAL",
     "transfer_local_raw": "DELETE",
     "transfer_local_data": "TRANSFER_SERVER",
     "transfer_local_analysis": "TRANSFER_SERVER",
