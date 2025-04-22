@@ -56,54 +56,48 @@ for token in login.access_tokens:
     print("access_token  = {}".format(token.access_token))
     print("refresh_token = {}".format(token.refresh_token))
 
-# read devices associated with configured gateway
-device_map: list[DeviceMap] = []
-devices = resource.list_device_by_gateway(UUID(gateway_id))
+# read device associated with configured gateway
+device_schema = resource.read_device(UUID(gateway_id))
+address = 0x00
+resistors = [0.1, 0.1, 0.1]
+conv_avg = 0x00
+conv_time = 0x04
+for conf in device_schema.configs:
+    if conf.name == "smbus_address":
+        address = conf.value
+    elif conf.name == "resistor_0":
+        resistors[0] = conf.value
+    elif conf.name == "resistor_1":
+        resistors[1] = conf.value
+    elif conf.name == "resistor_2":
+        resistors[2] = conf.value
+    elif conf.name == "conversion_average":
+        conv_avg = conf.value
+    elif conf.name == "conversion_time":
+        conv_time = conf.value
+for model_id in device_schema.type.models:
+    model = resource.read_model(model_id)
+    if model.category == "DATA": break
 
-for device in devices:
-    if device.id == device.gateway_id: # filter out gateway
-        continue
-    address = 0x00
-    resistors = [0.1, 0.1, 0.1]
-    conv_avg = 0x00
-    conv_time = 0x04
-    for conf in device.configs:
-        if conf.name == "smbus_address":
-            address = conf.value
-        elif conf.name == "resistor_0":
-            resistors[0] = conf.value
-        elif conf.name == "resistor_1":
-            resistors[1] = conf.value
-        elif conf.name == "resistor_2":
-            resistors[2] = conf.value
-        elif conf.name == "conversion_average":
-            conv_avg = conf.value
-        elif conf.name == "conversion_time":
-            conv_time = conf.value
-    for model_id in device.type.models:
-        model = resource.read_model(model_id)
-        if model.category == "DATA": break
-
-    # Initialize INA3221 instance and data
-    ina3221 = INA3221(address=address, bus=GATEWAY["bus"])
-    data = INA3221Data(0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
-    device_map.append(DeviceMap(device.id, model_id, device.type.name, ina3221, data))
-    # Begin INA3221 sensor
-    if not ina3221.begin():
-        print("Could not connect. Fix and Reboot")
-    # Set custom shunt resistors
-    ina3221.set_shunt_resistor(0, resistors[0])
-    ina3221.set_shunt_resistor(0, resistors[1])
-    ina3221.set_shunt_resistor(0, resistors[2])
-    # Set conversion configuration
-    ina3221.set_average(conv_avg)
-    ina3221.set_bus_voltage_conversion_time(conv_time)
-    ina3221.set_shunt_voltage_conversion_time(conv_time)
+# Initialize INA3221 instance, data, and device map
+ina3221 = INA3221(address=address, bus=GATEWAY["bus"])
+data = INA3221Data(0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+device = DeviceMap(device_schema.id, model_id, device_schema.type.name, ina3221, data)
+# Begin INA3221 sensor
+if not ina3221.begin():
+    print("Could not connect. Fix and Reboot")
+# Set custom shunt resistors
+ina3221.set_shunt_resistor(0, resistors[0])
+ina3221.set_shunt_resistor(0, resistors[1])
+ina3221.set_shunt_resistor(0, resistors[2])
+# Set conversion configuration
+ina3221.set_average(conv_avg)
+ina3221.set_bus_voltage_conversion_time(conv_time)
+ina3221.set_shunt_voltage_conversion_time(conv_time)
 
 # Show devices
 print("DEVICES:")
-for device in device_map:
-    print(f"{device.id}    {device.model}    {device.type}")
+print(f"{device.id}    {device.model}    {device.type}")
 print()
 
 t_monitor = time.time()
@@ -117,37 +111,34 @@ while True:
     now = datetime.now().replace(microsecond=0)
     now_str = now.strftime("%Y-%m-%d %H:%M:%S")
 
-    # Get received data from node
-    for device in device_map:
+    # Accumulate voltage and current measurement
+    device.data.counter += 1
+    device.data.voltage_0 += device.ina3221.get_bus_voltage(0)
+    device.data.current_0 += device.ina3221.get_current(0)
+    device.data.voltage_1 += device.ina3221.get_bus_voltage(1)
+    device.data.current_1 += device.ina3221.get_current(1)
+    device.data.voltage_2 += device.ina3221.get_bus_voltage(2)
+    device.data.current_2 += device.ina3221.get_current(2)
+    # print(f"{now_str}    {device.data.counter}")
 
-        # Accumulate voltage and current measurement
-        device.data.counter += 1
-        device.data.voltage_0 += device.ina3221.get_bus_voltage(0)
-        device.data.current_0 += device.ina3221.get_current(0)
-        device.data.voltage_1 += device.ina3221.get_bus_voltage(1)
-        device.data.current_1 += device.ina3221.get_current(1)
-        device.data.voltage_2 += device.ina3221.get_bus_voltage(2)
-        device.data.current_2 += device.ina3221.get_current(2)
-        # print(f"{now_str}    {device.data.counter}")
+    # Average accumulated voltage and current measurement within a period of time
+    if time.time() >= (t_logger + GATEWAY["period_time"]):
+        t_logger += GATEWAY["period_time"]
+        voltage_0 = device.data.voltage_0 / device.data.counter
+        current_0 = device.data.current_0 / device.data.counter
+        voltage_1 = device.data.voltage_1 / device.data.counter
+        current_1 = device.data.current_1 / device.data.counter
+        voltage_2 = device.data.voltage_2 / device.data.counter
+        current_2 = device.data.current_2 / device.data.counter
+        device.data = INA3221Data(0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
 
-        # Average accumulated voltage and current measurement within a period of time
-        if time.time() >= (t_logger + GATEWAY["period_time"]):
-            t_logger += GATEWAY["period_time"]
-            voltage_0 = device.data.voltage_0 / device.data.counter
-            current_0 = device.data.current_0 / device.data.counter
-            voltage_1 = device.data.voltage_1 / device.data.counter
-            current_1 = device.data.current_1 / device.data.counter
-            voltage_2 = device.data.voltage_2 / device.data.counter
-            current_2 = device.data.current_2 / device.data.counter
-            device.data = INA3221Data(0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
-
-            # Create buffer with data from voltage and current average data
-            try:
-                data = [GATEWAY["period_time"], voltage_0, current_0, voltage_1, current_1, voltage_2, current_2]
-                resource.create_buffer(device.id, device.model, now, data, config.STATUS['logger_power_end'])
-                print(f"{now_str}    {voltage_0:6.3f}    {current_0:6.3f}    {voltage_1:6.3f}    {current_1:6.3f}    {voltage_2:6.3f}    {current_2:6.3f}")
-            except Exception as error:
-                print(error)
+        # Create buffer with data from voltage and current average data
+        try:
+            data = [GATEWAY["period_time"], voltage_0, current_0, voltage_1, current_1, voltage_2, current_2]
+            resource.create_buffer(device.id, device.model, now, data, config.STATUS['logger_power_end'])
+            print(f"{now_str}    {voltage_0:6.3f}    {current_0:6.3f}    {voltage_1:6.3f}    {current_1:6.3f}    {voltage_2:6.3f}    {current_2:6.3f}")
+        except Exception as error:
+            print(error)
 
     # print(f"{now_str}    {t_monitor}    {t_logger}")
 

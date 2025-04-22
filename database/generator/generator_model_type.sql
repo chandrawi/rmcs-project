@@ -2,16 +2,16 @@ INSERT INTO public.model (model_id,name,category,description,data_type) VALUES
 	 ('1f2d4175-a996-4680-8264-cfc5742cfbeb'::uuid,'Generator 2 int','GENERATOR','Data generator with 2 32-bit integer',decode('0303','hex')),
 	 ('820648a8-5b39-4f06-a477-7cfc0ccf9060'::uuid,'Generator 2 float','GENERATOR','Data generator with 2 64-bit floating point',decode('0D0D','hex'));
 INSERT INTO public.model_config (model_id,"index",name,value,"type",category) VALUES
-	 ('1f2d4175-a996-4680-8264-cfc5742cfbeb'::uuid,0,'name',decode('47656E657261746F722D696E74','hex'),17,'SCALE'),
+	 ('1f2d4175-a996-4680-8264-cfc5742cfbeb'::uuid,0,'scale',decode('47656E657261746F722D696E74','hex'),17,'SCALE'),
 	 ('1f2d4175-a996-4680-8264-cfc5742cfbeb'::uuid,0,'unit',decode('756E69746C657373','hex'),17,'UNIT'),
 	 ('1f2d4175-a996-4680-8264-cfc5742cfbeb'::uuid,0,'symbol',decode('756C','hex'),17,'SYMBOL'),
-	 ('1f2d4175-a996-4680-8264-cfc5742cfbeb'::uuid,1,'name',decode('47656E657261746F722D696E74','hex'),17,'SCALE'),
+	 ('1f2d4175-a996-4680-8264-cfc5742cfbeb'::uuid,1,'scale',decode('47656E657261746F722D696E74','hex'),17,'SCALE'),
 	 ('1f2d4175-a996-4680-8264-cfc5742cfbeb'::uuid,1,'unit',decode('756E69746C657373','hex'),17,'UNIT'),
 	 ('1f2d4175-a996-4680-8264-cfc5742cfbeb'::uuid,1,'symbol',decode('756C','hex'),17,'SYMBOL'),
-	 ('820648a8-5b39-4f06-a477-7cfc0ccf9060'::uuid,0,'name',decode('47656E657261746F722D666C6F6174','hex'),17,'SCALE'),
+	 ('820648a8-5b39-4f06-a477-7cfc0ccf9060'::uuid,0,'scale',decode('47656E657261746F722D666C6F6174','hex'),17,'SCALE'),
 	 ('820648a8-5b39-4f06-a477-7cfc0ccf9060'::uuid,0,'unit',decode('756E69746C657373','hex'),17,'UNIT'),
 	 ('820648a8-5b39-4f06-a477-7cfc0ccf9060'::uuid,0,'symbol',decode('756C','hex'),17,'SYMBOL'),
-	 ('820648a8-5b39-4f06-a477-7cfc0ccf9060'::uuid,1,'name',decode('47656E657261746F722D666C6F6174','hex'),17,'SCALE'),
+	 ('820648a8-5b39-4f06-a477-7cfc0ccf9060'::uuid,1,'scale',decode('47656E657261746F722D666C6F6174','hex'),17,'SCALE'),
 	 ('820648a8-5b39-4f06-a477-7cfc0ccf9060'::uuid,1,'unit',decode('756E69746C657373','hex'),17,'UNIT'),
 	 ('820648a8-5b39-4f06-a477-7cfc0ccf9060'::uuid,1,'symbol',decode('756C','hex'),17,'SYMBOL');
 INSERT INTO public.device_type (type_id,name,description) VALUES
