@@ -26,7 +26,7 @@ if len(config.GATEWAY_ENVIRONMENT) > 0:
         gateway_id = sys.argv[1] if sys.argv[1] in config.GATEWAY_ENVIRONMENT else gateway_id
     GATEWAY = config.GATEWAY_ENVIRONMENT[gateway_id]
     if all(k in GATEWAY for k in ("bus", "period_time")):
-        if "frequency" not in GATEWAY: GATEWAY['address'] = 0x76
+        if "address" not in GATEWAY: GATEWAY['address'] = 0x76
         invalid = False
 if invalid:
     raise Exception("Gateway ID input is missing, invalid format, or invalid gateway configuration")
@@ -54,13 +54,18 @@ for token in login.access_tokens:
 device_map: list[DeviceMap] = []
 devices = resource.list_device_by_gateway(UUID(gateway_id))
 for device in devices:
-    if device.id != device.gateway_id: # filter out gateway
-        for model_id in device.type.models:
-            model = resource.read_model(model_id)
-            if model.category == "DATA":
-                device_map.append(DeviceMap(device.id, model_id, device.type.name))
+    if device.id == device.gateway_id: # filter out gateway
+        continue
+    for model_id in device.type.models:
+        model = resource.read_model(model_id)
+        if model.category == "DATA":
+            device_map.append(DeviceMap(device.id, model_id, device.type.name))
+
+# Show devices
+print("DEVICES:")
 for device in device_map:
     print(device)
+print()
 
 
 # read temperature, pressure, and humidity for the first time
