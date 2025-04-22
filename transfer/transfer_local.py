@@ -51,9 +51,6 @@ for model in models:
 devices: list[DeviceSchema] = []
 for gateway_id in config.GATEWAYS:
     device_list = resource.list_device_by_gateway(UUID(gateway_id))
-    for index, device in enumerate(device_list):
-        if device.id == device.gateway_id:
-            device_list.pop(index)
     devices = devices + device_list
 
 print("RAW MODELS:")
@@ -70,6 +67,7 @@ device_map = {}
 for device in devices:
     print("{}: {}".format(device.id, device.name))
     device_map[device.id] = device.name
+print()
 
 
 while True:
@@ -91,6 +89,7 @@ while True:
             time_str = buffer.timestamp.strftime("%Y-%m-%d %H:%M:%S")
             if buffer.device_id not in device_map:
                 resource.delete_buffer(buffer.id)
+                print("{}    {}    UNRECOGNIZE DEVICE".format(time_str, buffer.device_id))
                 continue
             print("{}    {}    {}".format(time_str, buffer.device_id, device_map[buffer.device_id]))
         except grpc.RpcError as error:

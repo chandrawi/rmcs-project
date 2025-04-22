@@ -51,9 +51,6 @@ for token in login_main.access_tokens:
 devices: list[DeviceSchema] = []
 for gateway_id in config.GATEWAYS:
     device_list = resource.list_device_by_gateway(UUID(gateway_id))
-    for index, device in enumerate(device_list):
-        if device.id == device.gateway_id:
-            device_list.pop(index)
     devices = devices + device_list
 
 print("DEVICES:")
@@ -61,6 +58,7 @@ device_map = {}
 for device in devices:
     print("{}: {}".format(device.id, device.name))
     device_map[device.id] = device.name
+print()
 
 while True:
 
