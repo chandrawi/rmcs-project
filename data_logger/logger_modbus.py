@@ -86,10 +86,10 @@ while True:
             elif device.type == "SCL3300 inclinometer array":
                 rr = client.read_input_registers(slave=device.slave_id, address=0x04, count=4)
                 data = rr.registers
-            elif device.type == "piezometer":
+            elif device.type == "HPT604 piezometer":
                 rr = client.read_input_registers(slave=device.slave_id, address=0x10, count=6)
                 data = [rr.registers[0], rr.registers[1], rr.registers[3], rr.registers[4]]
-            elif device.type == "rain gauge":
+            elif device.type == "Hondetec rain gauge":
                 rr = client.read_holding_registers(slave=device.slave_id, address=0x00, count=10)
                 data = [rr.registers[2], rr.registers[0], rr.registers[5], rr.registers[4]]
             elif device.type == "environment sensor":
