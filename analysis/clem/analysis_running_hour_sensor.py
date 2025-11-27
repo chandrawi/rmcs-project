@@ -8,7 +8,7 @@ from uuid import UUID
 import math
 import grpc
 from rmcs_api_client.auth import Auth
-from rmcs_api_client.resource import Resource
+from rmcs_api_client.resource import Resource, Tag
 import config
 
 
@@ -82,7 +82,7 @@ while True:
     command = None
     try:
         # read buffer command with running hour sensor analysis status (ANALYSIS_2)
-        command = resource.read_buffer_first(None, model_command.id, "ANALYSIS_2")
+        command = resource.read_buffer_first(None, model_command.id, Tag.ANALYSIS_2)
     except grpc.RpcError as error:
         if error.code() == grpc.StatusCode.UNAUTHENTICATED:
             login = auth.user_login(config.SERVER_LOCAL['admin_name'], config.SERVER_LOCAL['admin_password'])
@@ -103,7 +103,7 @@ while True:
         shift_period = int(command.data[0])
         begin = command.timestamp
         end = begin + timedelta(seconds = shift_period)
-        data_basic = resource.list_data_by_range_time(command.device_id, model_data.id, begin, end)
+        data_basic = resource.list_data_by_range(command.device_id, model_data.id, begin, end)
         data_status: dict[int, bool] = {}
 
         # Create data status map between delta time and status
@@ -190,13 +190,13 @@ while True:
             time_str = timestamp.strftime("%Y-%m-%d %H:%M:%S")
             try:
                 print("{}    {}    {}".format(time_str, command.device_id, period))
-                resource.create_buffer(command.device_id, model_sensor.id, timestamp, [index, period], "TRANSFER_LOCAL")
+                resource.create_buffer(command.device_id, model_sensor.id, timestamp, [index, period], Tag.TRANSFER_LOCAL)
             except grpc.RpcError as error:
                 print(error)
                 # check if buffer already exist, update if exists
                 try:
                     buffer = resource.read_buffer_by_time(command.device_id, model_sensor.id, timestamp)
-                    resource.update_buffer(buffer.id, [period], "TRANSFER_LOCAL")
+                    resource.update_buffer(buffer.id, [period], Tag.TRANSFER_LOCAL)
                     print("BUFFER ALREADY EXISTS")
                 except grpc.RpcError as error:
                     print(error)

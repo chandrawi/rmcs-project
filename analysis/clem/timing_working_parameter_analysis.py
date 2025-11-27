@@ -8,7 +8,7 @@ from uuid import UUID
 import math
 import grpc
 from rmcs_api_client.auth import Auth
-from rmcs_api_client.resource import Resource
+from rmcs_api_client.resource import Resource, Tag
 import config
 
 
@@ -95,7 +95,7 @@ while True:
             data = [SHIFT_PERIOD]
             print("{}    {}    {}".format(begin, device_id, data))
             try:
-                resource.create_buffer(device_id, model_command.id, begin, data, "ANALYSIS_2")
+                resource.create_buffer(device_id, model_command.id, begin, data, Tag.ANALYSIS_2)
             except grpc.RpcError as error:
                 print(error)
                 if error.code() == grpc.StatusCode.UNAUTHENTICATED:

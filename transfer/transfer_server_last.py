@@ -7,7 +7,7 @@ from datetime import datetime
 from uuid import UUID
 import grpc
 from rmcs_api_client.auth import Auth
-from rmcs_api_client.resource import Resource, DeviceSchema
+from rmcs_api_client.resource import Resource, DeviceSchema, Tag
 import config
 
 
@@ -64,7 +64,7 @@ while True:
 
     buffers = []
     try:
-        buffers = resource.list_buffer_last_offset(buffer_number, buffer_offset, None, None, "TRANSFER_SERVER")
+        buffers = resource.list_buffer_group_last_offset(buffer_number, buffer_offset, device_map.keys(), None, Tag.TRANSFER_SERVER)
     except grpc.RpcError as error:
         if error.code() == grpc.StatusCode.UNAUTHENTICATED:
             login = auth.user_login(config.SERVER_LOCAL['admin_name'], config.SERVER_LOCAL['admin_password'])
@@ -77,21 +77,13 @@ while True:
         buffers =  []
 
     for buffer in buffers:
-
-        # check if a buffer has associated device
-        try:
-            time_str = buffer.timestamp.strftime("%Y-%m-%d %H:%M:%S")
-            if buffer.device_id not in device_map:
-                resource.delete_buffer(buffer.id)
-                continue
-            print("{}    {}    {}".format(time_str, buffer.device_id, device_map[buffer.device_id]))
-        except grpc.RpcError as error:
-            print(error)
+        time_str = buffer.timestamp.strftime("%Y-%m-%d %H:%M:%S")
+        print("{}    {}    {}".format(time_str, buffer.device_id, device_map[buffer.device_id]))
 
         # try to create buffer on main server database
         main_exist = True
         try:
-            resource_main.create_buffer(buffer.device_id, buffer.model_id, buffer.timestamp, buffer.data, "TRANSFER_LOCAL")
+            resource_main.create_buffer(buffer.device_id, buffer.model_id, buffer.timestamp, buffer.data, Tag.TRANSFER_LOCAL)
         except grpc.RpcError as error:
             if error.code() == grpc.StatusCode.UNAUTHENTICATED:
                 login_main = auth_main.user_login(config.SERVER_MAIN['admin_name'], config.SERVER_MAIN['admin_password'])
@@ -101,19 +93,17 @@ while True:
             elif error.code() == grpc.StatusCode.UNAVAILABLE:
                 print("UNAVAILABLE")
                 break
+            # check if buffer already exist
+            elif error.code() == grpc.StatusCode.ALREADY_EXISTS:
+                print(error)
             else:
                 print(error)
-                # check if buffer already exist
-                try:
-                    resource_main.read_buffer_by_time(buffer.device_id, buffer.model_id, buffer.timestamp)
-                except grpc.RpcError as error:
-                    main_exist = False
-                    print(error)
+                main_exist = False
 
         # delete or update status based on configuration only if buffer on main exists
         if main_exist:
             try:
-                if config.STATUS['transfer_server_end'] == "DELETE":
+                if config.STATUS['transfer_server_end'] == Tag.DELETE:
                     resource.delete_buffer(buffer.id)
                 else:
                     resource.update_buffer(buffer.id, None, config.STATUS['transfer_server_end'])

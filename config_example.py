@@ -1,3 +1,5 @@
+from rmcs_api_client.resource import Tag
+
 DATABASE = {
     "url_auth" : "postgres://postgres:password@127.0.0.1:5432/test_rmcs_auth",
     "url_resource" : "postgres://postgres:password@127.0.0.1:5432/test_rmcs_resource",
@@ -84,20 +86,21 @@ TIMING = {
 }
 
 STATUS = {
-    "logger_modbus_end": "ANALYSIS_1",
-    "logger_lora_end": "ANALYSIS_1",
-    "logger_environment_end": "TRANSFER_LOCAL",
-    "logger_power_end": "TRANSFER_LOCAL",
-    "transfer_local_raw": "DELETE",
-    "transfer_local_data": "TRANSFER_SERVER",
-    "transfer_local_analysis": "TRANSFER_SERVER",
-    "transfer_local_end": "TRANSFER_SERVER",
-    "transfer_server_end": "DELETE",
-    "transfer_external_db_begin": "EXTERNAL_OUTPUT",
-    "transfer_external_db_end": "DELETE",
-    "transfer_external_db_next": 23,
-    "transfer_external_api_begin": 23,
-    "transfer_external_api_end": "DELETE"
+    "logger_generator_end": Tag.TRANSFER_LOCAL,
+    "logger_modbus_end": Tag.ANALYSIS_1,
+    "logger_lora_end": Tag.ANALYSIS_1,
+    "logger_environment_end": Tag.TRANSFER_LOCAL,
+    "logger_power_end": Tag.TRANSFER_LOCAL,
+    "transfer_local_raw": Tag.DELETE,
+    "transfer_local_data": Tag.TRANSFER_SERVER,
+    "transfer_local_analysis": Tag.TRANSFER_SERVER,
+    "transfer_local_end": Tag.TRANSFER_SERVER,
+    "transfer_server_end": Tag.DELETE,
+    "transfer_external_db_begin": Tag.EXTERNAL_OUTPUT,
+    "transfer_external_db_end": Tag.DELETE,
+    "transfer_external_db_next": -23,
+    "transfer_external_api_begin": -23,
+    "transfer_external_api_end": Tag.DELETE,
 }
 
 EXTERNAL_API = {

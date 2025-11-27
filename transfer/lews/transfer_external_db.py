@@ -6,7 +6,7 @@ from datetime import datetime
 from uuid import UUID
 import psycopg
 from rmcs_api_client.auth import Auth
-from rmcs_api_client.resource import Resource, ModelSchema, DeviceSchema
+from rmcs_api_client.resource import Resource, ModelSchema, DeviceSchema, Tag
 import config
 
 
@@ -202,23 +202,15 @@ for device in devices:
 while True:
 
     # read buffers
-    buffers = resource.list_buffer_first_offset(buffer_number, buffer_offset, None, None, config.STATUS['transfer_external_db_begin'])
+    buffers = resource.list_buffer_group_first_offset(buffer_number, buffer_offset, device_map.keys(), None, config.STATUS['transfer_external_db_begin'])
 
     # create data from buffer
     for buffer in buffers:
-
-        # check if a buffer has associated device
-        try:
-            time_str = buffer.timestamp.strftime("%Y-%m-%d %H:%M:%S %z")
-            if buffer.device_id not in device_map:
-                resource.delete_buffer(buffer.id)
-                continue
-            if buffer.model_id in model_data_map:
-                print("{}    {}    DATA   {}".format(time_str, buffer.device_id, device_map[buffer.device_id]))
-            else:
-                print("{}    {}    RAW    {}".format(time_str, buffer.device_id, device_map[buffer.device_id]))
-        except Exception as error:
-            print(error)
+        time_str = buffer.timestamp.strftime("%Y-%m-%d %H:%M:%S %z")
+        if buffer.model_id in model_data_map:
+            print("{}    {}    DATA   {}".format(time_str, buffer.device_id, device_map[buffer.device_id]))
+        else:
+            print("{}    {}    RAW    {}".format(time_str, buffer.device_id, device_map[buffer.device_id]))
 
         # try to transfer data to external database only for buffer data
         external_exist = False
@@ -237,7 +229,7 @@ while True:
         # delete buffer only if data on local and data on external server exists
         if external_exist:
             try:
-                if config.STATUS['transfer_external_db_end'] == "DELETE":
+                if config.STATUS['transfer_external_db_end'] == Tag.DELETE:
                     resource.delete_buffer(buffer.id)
                 else:
                     resource.update_buffer(buffer.id, None, config.STATUS['transfer_external_db_end'])

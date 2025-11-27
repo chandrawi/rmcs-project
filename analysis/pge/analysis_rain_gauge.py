@@ -8,7 +8,7 @@ from datetime import datetime
 from uuid import UUID
 import math
 from rmcs_api_client.auth import Auth
-from rmcs_api_client.resource import Resource, BufferSchema
+from rmcs_api_client.resource import Resource, BufferSchema, Tag
 import config
 
 
@@ -69,7 +69,7 @@ def get_i16_value(u16_value: int, offset: int) -> int:
 while True:
 
     # read buffer based on raw model
-    buffers = resource.list_buffer_first(10, None, model_raw.id, "ANALYSIS_1")
+    buffers = resource.list_buffer_first(10, None, model_raw.id, Tag.ANALYSIS_1)
     # wait some moment when buffer is unavailable
     if len(buffers) == 0:
         time.sleep(config.TIMING['analysis_sleep'])
@@ -89,7 +89,7 @@ while True:
         time_str = buffer.timestamp.strftime("%Y-%m-%d %H:%M:%S")
         try:
             print("{}    {}    {}".format(time_str, buffer.device_id, data))
-            resource.create_buffer(buffer.device_id, model_data.id, buffer.timestamp, data, "TRANSFER_LOCAL")
-            resource.update_buffer(buffer.id, None, "TRANSFER_LOCAL")
+            resource.create_buffer(buffer.device_id, model_data.id, buffer.timestamp, data, Tag.TRANSFER_LOCAL)
+            resource.update_buffer(buffer.id, None, Tag.TRANSFER_LOCAL)
         except Exception as error:
             print(error)

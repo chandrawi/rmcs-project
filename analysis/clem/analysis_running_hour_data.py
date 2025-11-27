@@ -8,7 +8,7 @@ from uuid import UUID
 import math
 import grpc
 from rmcs_api_client.auth import Auth
-from rmcs_api_client.resource import Resource, BufferSchema
+from rmcs_api_client.resource import Resource, BufferSchema, Tag
 import config
 
 
@@ -118,7 +118,7 @@ while True:
     buffers = []
     try:
         # read buffer based on raw model
-        buffers = resource.list_buffer_first_offset(buffer_number, buffer_offset, None, model_raw.id, "ANALYSIS_1")
+        buffers = resource.list_buffer_first_offset(buffer_number, buffer_offset, None, model_raw.id, Tag.ANALYSIS_1)
     except grpc.RpcError as error:
         if error.code() == grpc.StatusCode.UNAUTHENTICATED:
             login = auth.user_login(config.SERVER_LOCAL['admin_name'], config.SERVER_LOCAL['admin_password'])
@@ -175,8 +175,8 @@ while True:
         time_str = buffer.timestamp.strftime("%Y-%m-%d %H:%M:%S")
         try:
             print("{}    {}    {}".format(time_str, buffer.device_id, data))
-            resource.create_buffer(buffer.device_id, model_data.id, buffer.timestamp, data, "TRANSFER_LOCAL")
-            resource.update_buffer(buffer.id, None, "TRANSFER_LOCAL")
+            resource.create_buffer(buffer.device_id, model_data.id, buffer.timestamp, data, Tag.TRANSFER_LOCAL)
+            resource.update_buffer(buffer.id, None, Tag.TRANSFER_LOCAL)
         except grpc.RpcError as error:
             print(error)
             # check if buffer already exist, delete if exists

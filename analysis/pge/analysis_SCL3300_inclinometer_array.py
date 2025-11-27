@@ -9,7 +9,7 @@ from uuid import UUID
 import math
 import grpc
 from rmcs_api_client.auth import Auth
-from rmcs_api_client.resource import Resource, BufferSchema
+from rmcs_api_client.resource import Resource, BufferSchema, Tag
 import config
 
 
@@ -117,7 +117,7 @@ while True:
     # read first of buffers based on raw model and device group member limited by device number
     buffers: List[BufferSchema] = []
     try:
-        buffers = resource.list_buffer_first_by_ids(number, device_ids, [model_raw.id], "ANALYSIS_1")
+        buffers = resource.list_buffer_group_first(number, device_ids, [model_raw.id], Tag.ANALYSIS_1)
     except grpc.RpcError as error:
         if error.code() == grpc.StatusCode.UNAUTHENTICATED:
             login = auth.user_login(config.SERVER_LOCAL['admin_name'], config.SERVER_LOCAL['admin_password'])
@@ -145,7 +145,7 @@ while True:
             complete = False
             try:
                 print("INCOMPLETE BUFFER:    {}    {}".format(buffer.timestamp, buffer.device_id))
-                resource.update_buffer(buffer.id, None, "ERROR")
+                resource.update_buffer(buffer.id, None, Tag.ERROR)
             except Exception as error:
                 print(error)
     if not complete:
@@ -177,20 +177,21 @@ while True:
         last_angle_y = angle_y
         last_angle_z = angle_z
 
-        # create data buffer for soil inclinometer and remove raw buffer
+        # create data buffer for soil inclinometer
         displacement_y_total = displacement_y + device_set[i].initial_displacement_y
         displacement_z_total = displacement_z + device_set[i].initial_displacement_z
         data = [math.degrees(angle_y), math.degrees(angle_z), displacement_y_total, displacement_z_total, temperature]
         try:
             print("{}    {}    {}".format(buffer_set[i].timestamp.strftime("%Y-%m-%d %H:%M:%S"), device_set[i].id, data))
-            resource.create_buffer(device_set[i].id, model_data.id, buffer_set[i].timestamp, data, "TRANSFER_LOCAL")
-            resource.update_buffer(buffer_set[i].id, None, "TRANSFER_LOCAL")
+            resource.create_buffer(device_set[i].id, model_data.id, buffer_set[i].timestamp, data, Tag.TRANSFER_LOCAL)
         except Exception as error:
             print(error)
+            # update buffer if buffer already exists
+            if error.code() == grpc.StatusCode.ALREADY_EXISTS:
+                resource.update_buffer_by_time(device_set[i].id, model_data.id, buffer_set[i].timestamp, data, Tag.TRANSFER_LOCAL)
 
-            # check if buffer already exist, update buffer if exists
-            try:
-                resource.read_buffer_by_time(device_set[i].id, model_data.id, buffers[i].timestamp)
-                resource.update_buffer(buffers[i].id, None, "TRANSFER_LOCAL")
-            except Exception as error:
-                print(error)
+        # update raw buffer
+        try:
+            resource.update_buffer(buffer_set[i].id, None, Tag.TRANSFER_LOCAL)
+        except Exception as error:
+            print(error)

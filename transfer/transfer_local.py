@@ -7,7 +7,7 @@ from datetime import datetime
 from uuid import UUID
 import grpc
 from rmcs_api_client.auth import Auth
-from rmcs_api_client.resource import Resource, DeviceSchema
+from rmcs_api_client.resource import Resource, DeviceSchema, Tag
 import config
 
 
@@ -74,7 +74,7 @@ while True:
 
     buffers = []
     try:
-        buffers = resource.list_buffer_first_offset(buffer_number, buffer_offset, None, None, "TRANSFER_LOCAL")
+        buffers = resource.list_buffer_group_first_offset(buffer_number, buffer_offset, device_map.keys(), None, Tag.TRANSFER_LOCAL)
     except grpc.RpcError as error:
         if error.code() == grpc.StatusCode.UNAUTHENTICATED:
             login = auth.user_login(config.SERVER_LOCAL['admin_name'], config.SERVER_LOCAL['admin_password'])
@@ -83,36 +83,31 @@ while True:
         continue
 
     for buffer in buffers:
+        time_str = buffer.timestamp.strftime("%Y-%m-%d %H:%M:%S")
+        print("{}    {}    {}".format(time_str, buffer.device_id, device_map[buffer.device_id]))
 
-        # check if a buffer has associated device
-        try:
-            time_str = buffer.timestamp.strftime("%Y-%m-%d %H:%M:%S")
-            if buffer.device_id not in device_map:
-                resource.delete_buffer(buffer.id)
-                print("{}    {}    UNRECOGNIZE DEVICE".format(time_str, buffer.device_id))
-                continue
-            print("{}    {}    {}".format(time_str, buffer.device_id, device_map[buffer.device_id]))
-        except grpc.RpcError as error:
-            print(error)
+        # choose a tag based on buffer timestamp
+        tag = Tag.DEFAULT
+        if buffer.timestamp.second == 0 and buffer.timestamp.minute == 0:
+            tag = Tag.HOURLY
+            if buffer.timestamp.hour == 0:
+                tag = Tag.DAILY
 
         # try to create data on local database
         renew_flag = False
         try:
-            resource.create_data(buffer.device_id, buffer.model_id, buffer.timestamp, buffer.data)
+            resource.create_data(buffer.device_id, buffer.model_id, buffer.timestamp, buffer.data, tag)
         except grpc.RpcError as error:
             print(error)
             # check if data already exist
-            try:
-                resource.read_data(buffer.device_id, buffer.model_id, buffer.timestamp)
+            if error.code() == grpc.StatusCode.ALREADY_EXISTS:
                 renew_flag = True
-            except grpc.RpcError as error:
-                print(error)
 
         # renew data when create data error and old data exists
         if renew_flag:
             try:
                 resource.delete_data(buffer.device_id, buffer.model_id, buffer.timestamp)
-                resource.create_data(buffer.device_id, buffer.model_id, buffer.timestamp, buffer.data)
+                resource.create_data(buffer.device_id, buffer.model_id, buffer.timestamp, buffer.data, tag)
             except grpc.RpcError as error:
                 print(error)
 
@@ -126,7 +121,7 @@ while True:
                 status = config.STATUS['transfer_local_data']
             elif buffer.model_id in models_analysis:
                 status = config.STATUS['transfer_local_analysis']
-            if status == "DELETE":
+            if status == Tag.DELETE:
                 resource.delete_buffer(buffer.id)
             else:
                 resource.update_buffer(buffer.id, None, status)

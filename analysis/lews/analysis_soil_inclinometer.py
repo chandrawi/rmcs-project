@@ -8,7 +8,7 @@ from datetime import datetime
 from uuid import UUID
 import math
 from rmcs_api_client.auth import Auth
-from rmcs_api_client.resource import Resource, BufferSchema
+from rmcs_api_client.resource import Resource, BufferSchema, Tag
 import config
 
 
@@ -99,7 +99,7 @@ def get_i16_value(u16_value: int, offset: int) -> int:
 while True:
 
     # read buffers based on raw model limited by device number
-    buffers = resource.list_buffer_first(number, None, model_raw.id, "ANALYSIS_1")
+    buffers = resource.list_buffer_first(number, None, model_raw.id, Tag.ANALYSIS_1)
     # wait some moment when available buffers lower than device number
     if number > len(buffers):
         time.sleep(config.TIMING['analysis_sleep'])
@@ -119,7 +119,7 @@ while True:
         # remove some first buffers if buffer set invalid
         for buffer in buffer_set:
             try:
-                resource.update_buffer(buffer.id, None, "TRANSFER_LOCAL")
+                resource.update_buffer(buffer.id, None, Tag.TRANSFER_LOCAL)
             except Exception as error:
                 print(error)
         continue
@@ -158,7 +158,7 @@ while True:
         data = [ax/4096.0, ay/4096.0, az/4096.0, angle_x, angle_z, displacement_x, displacement_z]
         try:
             print("{}    {}    {}".format(time_str, devices[i].id, data))
-            resource.create_buffer(devices[i].id, model_data.id, buffers[i].timestamp, data, "TRANSFER_LOCAL")
-            resource.update_buffer(buffers[i].id, None, "TRANSFER_LOCAL")
+            resource.create_buffer(devices[i].id, model_data.id, buffers[i].timestamp, data, Tag.TRANSFER_LOCAL)
+            resource.update_buffer(buffers[i].id, None, Tag.TRANSFER_LOCAL)
         except Exception as error:
             print(error)

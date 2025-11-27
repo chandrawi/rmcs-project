@@ -7,7 +7,7 @@ from uuid import UUID
 import grpc
 import requests
 from rmcs_api_client.auth import Auth
-from rmcs_api_client.resource import Resource, ModelSchema, DeviceSchema
+from rmcs_api_client.resource import Resource, ModelSchema, DeviceSchema, Tag
 import config
 
 
@@ -109,7 +109,7 @@ while True:
     # read buffers
     buffers = []
     try:
-        buffers = resource.list_buffer_first(25, None, None, config.STATUS['transfer_external_api_begin'])
+        buffers = resource.list_buffer_group_first(25, device_map.keys(), None, config.STATUS['transfer_external_api_begin'])
     except grpc.RpcError as error:
         if error.code() == grpc.StatusCode.UNAUTHENTICATED:
             login = auth.user_login(config.SERVER_LOCAL['admin_name'], config.SERVER_LOCAL['admin_password'])
@@ -119,14 +119,8 @@ while True:
 
     # create data from buffer
     for buffer in buffers:
-
-        # check if a buffer has associated device
-        try:
-            if buffer.device_id not in device_map:
-                resource.delete_buffer(buffer.id)
-                continue
-        except grpc.RpcError as error:
-            print(error)
+        time_str = buffer.timestamp.strftime("%Y-%m-%d %H:%M:%S")
+        print("{}    {}    {}".format(time_str, buffer.device_id, device_map[buffer.device_id]))
 
         # transfer data through external api
         code = 0
@@ -143,7 +137,7 @@ while True:
         # delete or update status based on configuration only if response code is 201
         if code == 201:
             try:
-                if config.STATUS['transfer_external_api_end'] == "DELETE":
+                if config.STATUS['transfer_external_api_end'] == Tag.DELETE:
                     resource.delete_buffer(buffer.id)
                 else:
                     resource.update_buffer(buffer.id, None, config.STATUS['transfer_external_api_end'])
