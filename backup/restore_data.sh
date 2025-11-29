@@ -15,10 +15,9 @@ do
 done
 
 # get columns and backup directory
-COLUMNS="\"device_id\",\"model_id\",\"timestamp\",\"data\""
+COLUMNS="\"device_id\",\"model_id\",\"timestamp\",\"tag\",\"data\""
 PREFIX="data"
 if [ $BACKUP_TABLE = "data_buffer" ]; then
-	COLUMNS="\"device_id\",\"model_id\",\"timestamp\",\"data\",\"status\""
 	PREFIX="buffer"
 elif [ $BACKUP_TABLE = "data_slice" ]; then
 	COLUMNS="\"device_id\",\"model_id\",\"timestamp_begin\",\"timestamp_end\",\"name\",\"description\""
@@ -36,5 +35,6 @@ done
 
 # restore data
 for command in "${COMMANDS[@]}"; do
+	echo "$command"
 	psql $DB_URL -c "$command"
 done

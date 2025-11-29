@@ -17,8 +17,8 @@ do
 		d) BACKUP_DIRECTORY=${OPTARG};;
 		D) GROUP_DEVICE=${OPTARG};;
 		M) GROUP_MODEL=${OPTARG};;
-		a) ADD_STATUS=${OPTARG};;
-		r) REPLACE_STATUS=${OPTARG};;
+		t) TAG_FILTER=${OPTARG};;
+		r) REPLACE_TAG=${OPTARG};;
 		X) DELETE_FLAG=1;;
 	esac
 done
@@ -43,74 +43,90 @@ BEGIN=$(date +'%Y-%m-%dT%H:%M:%S%z' -d "@$BEGIN_SEC")
 END=$(date +'%Y-%m-%dT%H:%M:%S%z' -d "@$END_SEC")
 
 # construct select query with between begin and end datetime filter
-COLUMNS="\"device_id\",\"model_id\",\"timestamp\",\"data\""
+COLUMNS="\"device_id\",\"model_id\",\"timestamp\",\"tag\",\"data\""
 COL_TS="\"timestamp\""
 PREFIX="data"
-if [[ $ADD_STATUS =~ ^[0-9]+$ ]]; then
-	COLUMNS="\"device_id\",\"model_id\",\"timestamp\",\"data\",$ADD_STATUS AS \"status\""
-	PREFIX="buffer"
+if [[ $REPLACE_TAG =~ ^[0-9]+$ ]]; then
+	COLUMNS="\"device_id\",\"model_id\",\"timestamp\",$REPLACE_TAG AS \"tag\",\"data\""
 fi
+QUERY="SELECT $COLUMNS FROM \"$BACKUP_TABLE\" WHERE \"timestamp\" >= '$BEGIN' AND \"timestamp\" < '$END'"
 if [ $BACKUP_TABLE = "data_buffer" ]; then
-	COLUMNS="\"device_id\",\"model_id\",\"timestamp\",\"data\",\"status\""
-	if [[ $REPLACE_STATUS =~ ^[0-9]+$ ]]; then
-		COLUMNS="\"device_id\",\"model_id\",\"timestamp\",\"data\",$REPLACE_STATUS AS \"status\""
-	fi
 	PREFIX="buffer"
 elif [ $BACKUP_TABLE = "data_slice" ]; then
 	COLUMNS="\"device_id\",\"model_id\",\"timestamp_begin\",\"timestamp_end\",\"name\",\"description\""
 	COL_TS="\"timestamp_begin\""
+	QUERY="SELECT $COLUMNS FROM \"$BACKUP_TABLE\" WHERE \"timestamp_begin\" >= '$BEGIN' AND \"timestamp_end\" <= '$END'"
 	PREFIX="slice"
 fi
-QUERY="SELECT $COLUMNS FROM \"$BACKUP_TABLE\" WHERE $COL_TS >= '$BEGIN' AND $COL_TS < '$END'"
 
 # get variables to construct a query if device or model group id match uuid pattern
-FILTER_FLAG=0
+MODEL_IDS=""
+DEVICE_IDS=""
+SUFFIX=""
 regex='[[:xdigit:]]{8}-[[:xdigit:]]{4}-[[:xdigit:]]{4}-[[:xdigit:]]{4}-[[:xdigit:]]{12}$'
 if [[ $GROUP_MODEL =~ $regex ]]; then
-	FILTER_FLAG=1
-	COL_ID=model_id
-	TB_GROUP=group_model
-	TB_MAP=group_model_map
-	SUFFIX=$GROUP_MODEL
-fi
-if [[ $GROUP_DEVICE =~ $regex ]]; then
-	FILTER_FLAG=2
-	COL_ID=device_id
-	TB_GROUP=group_device
-	TB_MAP=group_device_map
-	SUFFIX=$GROUP_DEVICE
-fi
-# run a select query to get list of devices or models
-if [[ FILTER_FLAG -gt 0 ]]; then
-	RESULT=($(psql $DB_URL -AXqtc "SELECT \"${COL_ID}\" FROM \"${TB_GROUP}\" INNER JOIN \"${TB_MAP}\" USING (\"group_id\") WHERE \"group_id\"='${SUFFIX}';"))
-# construct where clause query with array of devices or models
+	SUFFIX+="_M_$GROUP_MODEL"
+	# run a select query to get list of devices or models
+	RESULT=($(psql $DB_URL -AXqtc "SELECT \"model_id\" FROM \"group_model\" INNER JOIN \"group_model_map\" USING (\"group_id\") WHERE \"group_id\"='${GROUP_MODEL}';"))
+	# construct where clause query with array of devices or models
 	if [[ ${#RESULT[@]} -gt 0 ]]; then
-		FILTER_ID="("
-		for res in "${RESULT[@]}"; do FILTER_ID+="'${res}',"; done
-		FILTER_ID="${FILTER_ID:0:$((${#FILTER_ID}-1))})"
-		QUERY+=" AND \"${COL_ID}\" IN ${FILTER_ID}"
+		for res in "${RESULT[@]}"; do MODEL_IDS+="'${res}',"; done
+		MODEL_IDS="${MODEL_IDS:0:$((${#MODEL_IDS}-1))}"
+		QUERY+=" AND \"model_id\" IN (${MODEL_IDS})"
 	fi
 fi
+if [[ $GROUP_DEVICE =~ $regex ]]; then
+	SUFFIX+="_D_$GROUP_DEVICE"
+	# run a select query to get list of devices or models
+	RESULT=($(psql $DB_URL -AXqtc "SELECT \"device_id\" FROM \"group_device\" INNER JOIN \"group_device_map\" USING (\"group_id\") WHERE \"group_id\"='${GROUP_DEVICE}';"))
+	# construct where clause query with array of devices or models
+	if [[ ${#RESULT[@]} -gt 0 ]]; then
+		for res in "${RESULT[@]}"; do DEVICE_IDS+="'${res}',"; done
+		DEVICE_IDS="${DEVICE_IDS:0:$((${#DEVICE_IDS}-1))}"
+		QUERY+=" AND \"device_id\" IN (${DEVICE_IDS})"
+	fi
+fi
+
+# add tag filter to query
+TAGS=""
+if [[ $TAG_FILTER =~ ^[0-9]+$ && $BACKUP_TABLE != "data_slice" ]]; then
+	TAGS="$TAG_FILTER"
+	if [[ -n "$MODEL_IDS" ]]; then
+		RESULT=($(psql $DB_URL -AXqtc "SELECT \"members\" FROM \"model_tag\" WHERE \"model_id\" IN (${MODEL_IDS}) AND \"tag\"=${TAG_FILTER};"))
+		if [[ ${#RESULT[@]} -gt 0 ]]; then
+			for res in "${RESULT[@]}"; do
+				hex="${res#\\x}"
+				for ((i=0; i<${#hex}; i+=2)); do part="${hex:i:2}"; TAGS+=",$((16#$part))"; done
+			done
+		fi
+	fi
+	QUERY+=" AND \"tag\" IN (${TAGS})"
+fi
 QUERY+=" ORDER BY $COL_TS ASC"
-echo $QUERY
 
 # create backup directory and prepare backup file output path
 BACKUP_DIRECTORY+="/$PREFIX"
 mkdir -p $BACKUP_DIRECTORY
 DATETIME=$(date +'%Y-%m-%d_%H-%M-%S_%z' -d "@$BEGIN_SEC")
-BACKUP_PATH="${BACKUP_DIRECTORY}/${PREFIX}_${DATETIME}"
-if [[ FILTER_FLAG -gt 0 ]]; then BACKUP_PATH+="_${SUFFIX}"; fi
-BACKUP_PATH+=".csv"
+BACKUP_PATH="${BACKUP_DIRECTORY}/${PREFIX}_${DATETIME}${SUFFIX}.csv"
 echo $BACKUP_PATH
 
 # run copy command to a csv file for select query result on data or data_buffer table
+echo $QUERY
 psql $DB_URL -c "\copy ($QUERY) to '$BACKUP_PATH' with (format csv, header true);"
 
 # delete data after backup if delete flag is true
 if [[ $DELETE_FLAG -eq 1 ]]; then
 	QUERY="DELETE FROM \"$BACKUP_TABLE\" WHERE $COL_TS >= '$BEGIN' AND $COL_TS < '$END'"
-	if [[ ${#RESULT[@]} -gt 0 ]]; then
-		QUERY+=" AND \"${COL_ID}\" IN ${FILTER_ID}"
+	if [[ -n "$MODEL_IDS" ]]; then
+		QUERY+=" AND \"model_id\" IN (${MODEL_IDS})"
 	fi
-	psql $DB_URL -c "$QUERY"
+	if [[ -n "$DEVICE_IDS" ]]; then
+		QUERY+=" AND \"device_id\" IN (${DEVICE_IDS})"
+	fi
+	if [[ -n "$TAGS" ]]; then
+		QUERY+=" AND \"tag\" IN (${TAGS})"
+	fi
+	echo $QUERY
+	psql $DB_URL -c "$QUERY;"
 fi
